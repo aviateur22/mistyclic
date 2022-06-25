@@ -5,7 +5,9 @@ module.exports = async(req, res, next)=>{
     /**Recupération des cookies */ 
     if(!req.cookie){
         throw ({message: 'vous n`\'avez pas les droits pour executer l\'action demandée', statusCode:'403'});
-    }    
+    }      
+    
+  
     
     /** récupération du cookie de token */
     if(!req.cookie.token_data){

@@ -3,12 +3,15 @@ const router = express.Router();
 
 //traitement des erreurs
 const error = require('../controllers/error');
-//traitement des paths inconnus
 const notFound = require('../controllers/notFound');
 const apiRouter = require('./api');
+const unitTestRouter = require('./unitTest');
 
 //api
 router.use('/api', apiRouter);
+
+//unit test
+router.use('/test', unitTestRouter);
 
 //404
 router.use(notFound);

@@ -1,0 +1,20 @@
+@uri = http://localhost:{{ $dotenv PORT }}
+
+#csurf - cookie avec une jwt valide 1 an
+@cookie_csurf = token_data=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InRva2VuIjoiZXlKamIyNTBaVzUwSWpvaWIzUlRTR3RRV0d4aWRHOXpXR1UzV1d0WWVVcFhUSE5IYkhCWVRtOW5WV1JRVFdoUGNtaFJUemhXYUZkV1JHMWlVWHBHU1ZVdlJtd3ljRzRyYUZVdmVVTmFPRGxNYzA5MlVtSnpZVlpLYW5wR2NrNVNXblFyWmtGUmVVSXpSME50VDJ0UFNFVXlZV3hYTTBSSmNqSmtWVll3UWt3NU0ydGxPVTFCUVdKck5WTWlmUT09In0sImlhdCI6MTY1NjA3OTY0MSwiZXhwIjoxNjg2MzE5NjQxLCJpc3MiOiJjdG91dHdlYiIsInN1YiI6ImNzdXJmX3Rva2VuIiwianRpIjoiYzJmMTUwZTEtZjMzNy00MjI4LWE1OGEtNDNmMjAyNWUyMmFlIn0.5t-nIXyJYv1nu_HzGyA4hDvMkVD5_SlEx54s0EBUV-A
+
+#auth - cookie avec un jwt valide 1 an
+@cookie_auth = authorization=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2NTYwODI2MDEsImV4cCI6MTY4NjMyMjYwMSwiaXNzIjoibWlzdHljbGljIiwic3ViIjoiYXV0aG9yaXphdGlvbiIsImp0aSI6ImEwN2M4MzEzLTEzYTAtNDViZi1iMWFjLWZkZjk5NmJkZjUwMyJ9.DkeS5dj7MGIbQ-XfsWZolWOKC-3p7N573sWq3EON0Fo
+#token associé a ce jwt
+@token = "eyJjb250ZW50IjoiMnRsNU14NVk0MnVOM3VYcm0rcVdmUGJzZHhJYU1CMU1TcTRyZFQ3RUx4MzJRUFo5SE5UcTFtTnBONEF2RTUwVSJ9"
+
+### test d'ajout de post
+POST {{uri}}/api/offers/
+Cookie: {{cookie_csurf}}
+Cookie: {{cookie_auth}}
+Content-Type: application/json
+
+{
+    "token": {{token}}
+    
+}
