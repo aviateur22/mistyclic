@@ -9,7 +9,7 @@ const router = express.Router();
 
 const jwtExpireIn = require('../helpers/jwtExpireIn');
 const tokenController = require('../controllers/token');
-const authController = require('../../tests/generateCookieAuth');
+const authController = require('../../tests/cookieAuth/generateCookieAuth');
 const controllerHandler = require('../helpers/controllerHandler');
 
 //création d'une offre

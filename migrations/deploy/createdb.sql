@@ -29,6 +29,8 @@ CREATE TABLE "user"(
     "email" TEXT NOT NULL,
     "password" TEXT NOT NULL,
     "role_id" INTEGER NOT NULL DEFAULT 1 REFERENCES "role"("id") ON DELETE CASCADE,
+    "active_account" BOOLEAN NOT NULL DEFAULT false,
+    "active_professional" BOOLEAN NOT NULL DEFAULT false,
     "city_id" INTEGER REFERENCES "city"("id") ON DELETE CASCADE,
     "created_at" TIMESTAMPTZ NOT NULL DEFAULT now(),
     "updated_at" TIMESTAMPTZ

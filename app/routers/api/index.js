@@ -6,7 +6,8 @@ const userRouter = require('./user');
 const professionalRouter = require('./professional');
 const offerRouter = require('./offer');
 const storeRouter = require('./store');
-const unAuthenticateRouter = require('./unAuthenticated');
+const typeRouter = require('./type');
+const anonymousRouter = require('./anonymous');
 const tokenRouter = require ('./token');
 
 /**middleware */
@@ -16,12 +17,14 @@ const cookie = require('../../middlewares/cookie');
 const authorization = require('../../middlewares/authorization');
 const userPrivilege = require('../../middlewares/userPrivilege');
 
-
 //personne non authentifié
-router.use('/unauthenticate', unAuthenticateRouter);
+router.use('/anonymous', anonymousRouter);
 
 //gestion des commerces
 router.use('/stores', storeRouter);
+
+//gestion des type de commerces
+router.use('/types', typeRouter);
 
 //gestion offre
 router.use('/offers', offerRouter);

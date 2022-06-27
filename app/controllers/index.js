@@ -6,13 +6,13 @@ const notfoundController = require('./notFound');
 const tokenController = require('./token');
 const offerController = require('./offer');
 const storeController = require('./store');
-//test unitaire
-const testController = require('../../tests/generateJWT');
+const typeController = require('./type');
 
 module.exports = {
     errorController,
     notfoundController,
     tokenController,
     storeController,
-    offerController
+    offerController,
+    typeController
 };

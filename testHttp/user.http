@@ -9,11 +9,9 @@
 @token = "eyJjb250ZW50IjoiMnRsNU14NVk0MnVOM3VYcm0rcVdmUGJzZHhJYU1CMU1TcTRyZFQ3RUx4MzJRUFo5SE5UcTFtTnBONEF2RTUwVSJ9"
 
 ### test d'ajout de post
-POST {{uri}}/api/offers/
-Cookie: {{cookie_csurf}}
-Cookie: {{cookie_auth}}
+POST {{uri}}/api/anonymous/register
 Content-Type: application/json
 
 {
-    "token": {{token}}    
+    "email": "ddddddd"    
 }

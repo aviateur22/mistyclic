@@ -11,6 +11,8 @@ module.exports = {
             throw ({ statusCode: 400, message: 'données manquantes pour créer un commerce' });
         }
 
+        const user = await User.findByPk(userId)
+
         //création du store
         const createStore = await Store.create({
             name: name,
@@ -32,4 +34,6 @@ module.exports = {
     updateStore: async(req, res, next)=>{
 
     }
+
+    
 };

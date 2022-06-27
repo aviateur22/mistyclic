@@ -40,10 +40,10 @@ describe('Création d\'un store',()=>{
                 token: csurfToken,
                 name: 'Toto Fleur H24 - jour et nuit',
                 presentation: 'Manasin de fleur magnifique',
-                street: '32bis chemin des fageolle',
+                street: '32 bis chemin des fageolle',
                 phone: '06 23 27 41 06',
                 imageName: 'mon magasin .jpg',
-                userId: '1',
+                userId: '2',
                 email: 'bonjour@hotmail.fr',
                 cityId: '1',
                 typeId: '1'

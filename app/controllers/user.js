@@ -1,4 +1,4 @@
-module.export = {
+module.export = {    
     /**
      * génération d'un token unique pour l'offre séléctionné
      * @param {*} req 

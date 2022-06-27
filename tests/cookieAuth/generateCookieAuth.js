@@ -1,8 +1,8 @@
 //genration de JWT
-const JWT = require('../app/helpers/security/jwt');
+const JWT = require('../../app/helpers/security/jwt');
 //dur"
-const jwtExpireIn = require('../app/helpers/jwtExpireIn');
-const cookieOption = require('../app/helpers/cookieOption');
+const jwtExpireIn = require('../../app/helpers/jwtExpireIn');
+const cookieOption = require('../../app/helpers/cookieOption');
 
 /**
  * Test Unit

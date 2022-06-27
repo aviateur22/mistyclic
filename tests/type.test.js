@@ -19,10 +19,11 @@ describe('récupération des cookie et token',()=>{
         const token  = await request(app)
             .get('/test/cookie-csurf');
         
+           
         cookieAuth = (auth['header']['set-cookie'][0].split(';'))[0];
         cookieCsurf = (token['header']['set-cookie'][0].split(';'))[0];
-        csurfToken = token['_body']['token'];     
-        
+        csurfToken = token['_body']['token'];   
+
         //vérification cookie + token
         expect(cookieAuth).toContain('authorization');
         expect(cookieCsurf).toContain('token_data');
@@ -30,28 +31,18 @@ describe('récupération des cookie et token',()=>{
     });   
 });
 
-//application
-describe('Création d\'une offre',()=>{
-    it('l\'offre doit être en echec', async()=>{        
+//gestion type de magasin
+describe('gestion type de magasin',()=>{
+    it('réussite', async()=>{        
         //crétion d'une offre
         const res = await request(app)
-            .post('/api/offers')
+            .post('/api/types')
             .send({
                 token: csurfToken,
-                name: 'mes fleurs à vendres pour pas chers',
-                presentation: 'pour l\'achat de 2 roses, vous bénificié d\'un remboursement immédiat de 0.50€',
-                globalRefund: '499',
-                individualRefund: '0.50',
-                imageName: 'fleurkmdmmsqmqsùm^q.jpg',
-                userId: '1',
-                storeId: '2',
-                conditions: ['1']
+                name: 'boucherie',
             })
             .set('Cookie',[cookieAuth, cookieCsurf]);
-        expect(res.body).toHaveProperty('errorMessage');
-        expect(res.statusCode).toEqual(500); 
-    });
-
-    it('génération d\'un jwt', async()=>{
+        expect(res.body).toHaveProperty('message');
+        expect(res.statusCode).toEqual(200); 
     });
 });
