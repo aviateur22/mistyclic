@@ -22,45 +22,60 @@ const controllerHandler = require('../../helpers/controllerHandler');
 //création d'une offre
 router.post('/',
     multer.none(),
-    //validation(csurfTokenSchema.csurfTokenSchema, 'body'),    
+    validation(offerSchema.createOfferSchema, 'body'),
     controllerHandler(cookie),
     controllerHandler(authorization),    
     controllerHandler(validateCsurfToken),
-    controllerHandler(userPrivilege(userRole.professional)),
-    validation(offerSchema.createOfferSchema, 'body'),
+    controllerHandler(userPrivilege(userRole.professional)),    
     controllerHandler(offerController.createOffer));
 
 //update d'une offre
 router.patch('/:offerId', 
     multer.none(),
-    controllerHandler(cookie),
-    controllerHandler(authorization),    
-    controllerHandler(validateCsurfToken),
     validation(offerSchema.offerIdSchema, 'params'),
     validation(offerSchema.updateOfferSchema),
-    controllerHandler(offerController.updateOffer));
+    controllerHandler(cookie),
+    controllerHandler(authorization),    
+    controllerHandler(validateCsurfToken),    
+    controllerHandler(offerController.updateOfferById));
+
+//récupération de toutes les lecons
+router.get('/', controllerHandler(offerController.getOffers));
+
+router.get('/:offerId', 
+    validation(offerSchema.offerIdSchema, 'params'),
+    controllerHandler(offerController.getOfferById));
+
+//récuperation des offres par ville
+router.get('/by-city/:cityId', 
+    validation(offerSchema.cityIdSchema, 'params'),
+    controllerHandler(offerController.getOffersByCity));
+
+//récupération des offres par store
+router.get('/by-store/:storeId', 
+    validation(offerSchema.storeIdSchema, 'params'),
+    controllerHandler(offerController.getOffersByStore));
 
 //delete d'une offre
 router.delete('/:offerId',
-    multer.none(),    
+    multer.none(),   
+    validation(offerSchema.deleteOfferSchema, 'body'),    
+    validation(offerSchema.offerIdSchema, 'params'),  
     controllerHandler(cookie),
     controllerHandler(authorization),    
     controllerHandler(validateCsurfToken),
-    controllerHandler(userPrivilege(userRole.professional)),
-    validation(offerSchema.offerIdSchema, 'params'),    
-    validation(offerSchema.deleteOfferSchema, 'body'),
-    controllerHandler(offerController.deleteOffer));
+    controllerHandler(userPrivilege(userRole.professional)),    
+    controllerHandler(offerController.deleteOfferById));
 
 // génération token 5 lettres par un client
-router.get('/generate-token/:offerId',
+router.get('/generate-token/:offerId/token/:token/user/:userId',
     multer.none(),    
+    validation(offerSchema.generateTokenSchema, 'params'),
     controllerHandler(cookie),
-    controllerHandler(authorization),    
+    controllerHandler(authorization),
     controllerHandler(validateCsurfToken),
-    controllerHandler(userPrivilege(userRole.user)),
-    validation(offerSchema.offerIdSchema, 'params'),    
-    validation(offerSchema.generateTokenSchema, 'query'),
-    controllerHandler(offerController.clientGenerateToken));
+    controllerHandler(userPrivilege(userRole.user)),    
+    controllerHandler(offerController.clientGenerateTokenByOfferId));
 
 //Récupérations de tous les token pour une offres
 router.get('/tokens/:offerId',
@@ -82,5 +97,5 @@ router.get('/validate-token/:offerId',
     controllerHandler(userPrivilege(userRole.professional)),
     validation(offerSchema.offerIdSchema, 'params'),    
     validation(offerSchema.validateOfferTokenSchema, 'query'),
-    controllerHandler(offerController.deleteOffer));
+    controllerHandler(offerController.deleteOfferById));
 module.exports = router;

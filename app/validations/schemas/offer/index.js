@@ -7,6 +7,8 @@ const deleteOfferSchema = require('./deleteOffer');
 const updateOfferSchema = require('./updateOffer');
 const offerIdSchema = require('./offerId');
 const validateOfferTokenSchema = require('./validateOfferToken');
+const storeIdSchema = require('./storeId');
+const cityIdSchema = require('./cityId');
  
 module.exports = {
     createOfferSchema,
@@ -14,5 +16,7 @@ module.exports = {
     deleteOfferSchema,
     updateOfferSchema,
     offerIdSchema,
-    validateOfferTokenSchema
+    validateOfferTokenSchema,
+    cityIdSchema,
+    storeIdSchema
 };

@@ -33,8 +33,20 @@ router.post('/',
     controllerHandler(storeController.createStore));
 
 //update d'un store
-router.patch('/update-store',
-    schemaValidation(storeSchemaValidation.deleteSchema),
-    controllerHandler(storeController.updateStore));
+router.patch('/:storeId',
+    multer.none(),
+    controllerHandler(cookie),
+    controllerHandler(authorization),    
+    controllerHandler(validateCsurfToken),
+    controllerHandler(userPrivilege(userRole.professional)),
+    schemaValidation(storeSchemaValidation.storeSchema, 'body'),
+    schemaValidation(storeSchemaValidation.storeIdSchema, 'params'),
+    controllerHandler(storeController.updateStoreById));
+
+//update d'un store
+router.get('/:storeId',
+    schemaValidation(storeSchemaValidation.storeIdSchema, 'params'),
+    controllerHandler(storeController.getStoreById));
+
 
 module.exports = router;

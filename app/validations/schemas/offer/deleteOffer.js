@@ -3,7 +3,17 @@
  */
 const Joi = require('Joi');
 
-module.exports = Joi.object({    
+module.exports = Joi.object({
+    /** csurf token */
+    token: Joi
+        .string()
+        .required()
+        .messages({
+            'string.empty': 'token',
+            'any.required': 'token'  
+        }),
+
+    // id du professionnel
     userId: Joi
         .number()
         .required()

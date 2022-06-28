@@ -88,6 +88,15 @@ module.exports = Joi.object({
             'any.required': 'l\'identifiant du commerce est obligatoire'
         }),
     
+    //id du store
+    cityId: Joi
+        .number()
+        .required()
+        .messages({
+            'number.base': 'l\'identifiant de la ville n\'est pas correct',
+            'string.empty': 'l\'identifiant de la ville est obligatoire',
+            'any.required': 'l\'identifiant de la ville est obligatoire'
+        }),
     
     //condition pour récupérer l'offre
     conditions: Joi

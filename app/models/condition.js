@@ -6,7 +6,6 @@ class Condition extends Model{
 
 Condition.init({
     text: DataTypes.STRING,
-    offer_id: DataTypes.INTEGER
 },{
     sequelize,
     tableName:'condition'

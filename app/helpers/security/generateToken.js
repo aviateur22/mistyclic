@@ -11,11 +11,11 @@ module.exports = async(tokenLength) =>{
         /**recuperation aléatoire */
         await (async()=>{
             for(let i = 1; i <= tokenLength; i++) { 
-                let randomNumber = Math.floor(Math.random() * (tokenLength - 0)) + 0;
+                let randomNumber = Math.floor(Math.random() * (charArray.length));
                 if(token){
-                    token = token + charArray[randomNumber + 1];
+                    token = token + charArray[randomNumber];
                 } else {
-                    token = charArray[randomNumber + 1];
+                    token = charArray[randomNumber];
                 }
             }
         })();

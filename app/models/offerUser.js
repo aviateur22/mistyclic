@@ -6,7 +6,8 @@ class offerUser extends Model{
 
 offerUser.init({
     user_id: DataTypes.INTEGER,
-    offer_id: DataTypes.INTEGER
+    offer_id: DataTypes.INTEGER,
+    token: DataTypes.TEXT
 },{
     sequelize,
     tableName:'offer_has_user'

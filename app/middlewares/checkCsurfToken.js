@@ -14,8 +14,8 @@ module.exports = async(req, res, next)=>{
         throw ({message: 'vous n`\'avez pas les droits pour executer l\'action demandée', statusCode:'403'});
     }   
 
-    /** token depuis la requete */
-    const bodyToken = req.body.token;  
+    /** token depuis la requete soit dans le body doit dans les params*/    
+    const bodyToken = req.body.token ? req.body.token : req.params.token;  
 
     /** token de la requete absent */
     if(!bodyToken){

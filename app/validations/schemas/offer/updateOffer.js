@@ -5,7 +5,7 @@ const Joi = require('joi');
 
 module.exports = Joi.object({
     /** nom de l'offre */
-    name:Joi
+    name: Joi
         .string()
         .max(50)
         .min(4)
@@ -20,7 +20,7 @@ module.exports = Joi.object({
         }),
 
     /** présentation de l'offre*/    
-    presentation:Joi
+    presentation: Joi
         .string()
         .max(500)
         .min(4)

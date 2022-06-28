@@ -1,7 +1,9 @@
-const storeSchema = require('../store/store');
+const storeSchema = require('./store');
+const storeIdSchema = require('./storeId');
 /**
  * traitement de la données pour les stores
  */
 module.exports = {
-    storeSchema
+    storeSchema,
+    storeIdSchema
 };

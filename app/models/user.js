@@ -7,8 +7,8 @@ class User extends Model{
 User.init({
     email: DataTypes.STRING,
     password: DataTypes.STRING,
-    role_id: DataTypes.INTEGER,
-    city_id: DataTypes.INTEGER,
+    active_account: DataTypes.BOOLEAN,
+    actice_professional: DataTypes.BOOLEAN
 },{
     sequelize,
     tableName:'user'

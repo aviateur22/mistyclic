@@ -7,6 +7,7 @@
 module.exports = (schema, prop)=>async(req, res, next)=>{
     try {
         //Validation des données
+        console.log(req[prop])
         await schema.validateAsync(req[prop]);        
         next();        
     } catch (error) {           

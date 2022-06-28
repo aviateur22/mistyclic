@@ -2,6 +2,7 @@ const City = require('./city');
 const Condition = require('./condition');
 const Offer = require('./offer');
 const OfferUser = require('./offerUser');
+const ConditionOffer = require('./conditionOffer');
 const Role = require('./role');
 const Store = require('./store');
 const Type = require('./type');
@@ -77,12 +78,12 @@ Zip.hasMany(City,{
 
 //utilisateur - offer
 User.belongsToMany(Offer,{
-    through: 'offer_has_user',
+    through: OfferUser,
     as: 'usersHasOffers'
 });
 
 Offer.belongsToMany(User, {
-    through: 'offer_has_user',
+    through: OfferUser,
     as: 'offersHasUsers'
 });
 
@@ -110,22 +111,33 @@ Store.hasMany(Offer, {
 
 //offer - conditions
 Offer.belongsToMany(Condition,{
-    through: 'condition_has_offer',
+    through: ConditionOffer,
     as: 'offersHasConditions'
 
 });
 
 Condition.belongsToMany(Offer,{
-    through: 'condition_has_offer',
+    through: ConditionOffer,
     as: 'conditionsHasOffers'
 });
 
+//offre-ville
+Offer.belongsTo(City,{
+    foreignKey: 'city_id',
+    as: 'offerHasCity'
+});
+
+City.hasMany(Offer,{
+    foreignKey: 'city_id',
+    as: 'cityHasOffers'
+});
 
 module.exports = {
     City,
     Condition,
     Offer,
     OfferUser,
+    ConditionOffer,
     Role,
     Store,
     Type,

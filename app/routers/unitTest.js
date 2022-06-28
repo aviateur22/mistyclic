@@ -12,8 +12,11 @@ const tokenController = require('../controllers/token');
 const authController = require('../../tests/cookieAuth/generateCookieAuth');
 const controllerHandler = require('../helpers/controllerHandler');
 
-//création d'une offre
+//génération d'un cookie auth avec le role professionnel
 router.get('/cookie-auth', controllerHandler(authController(2)));
+
+//génération cookie pour un utilisateur
+router.get('/cookie-auth-user', controllerHandler(authController(1)));
 
 router.get('/cookie-csurf', controllerHandler(tokenController.getToken(jwtExpireIn.testTime)));
 
