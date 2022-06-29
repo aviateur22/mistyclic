@@ -1,7 +1,6 @@
 const { Offer, User, Store, Condition, OfferUser, ConditionOffer } = require('../models');
-const belongTo = require('../helpers/belongTo');
-const offerHelper = require('../helpers/offer');
-const randomToken = require('../helpers/security/generateToken');
+const OfferHelper = require('../helpers/controllerHelper/offer/offer');
+const userRole = require('../helpers/userRole');
 /**
  * offer Controller
  */
@@ -9,7 +8,7 @@ module.exports = {
     /**
      * Création d'une offre
      */
-    createOffer: async(req, res, next)=>{     
+    createOffer: async(req, res, next)=>{             
         //roleId de la personne que effectue la requete
         const requestRoleId = req.payload.data.roleId;
 
@@ -18,21 +17,17 @@ module.exports = {
 
         if(!name || !presentation || !globalRefund || !individualRefund || !imageName || !storeId || !userId || !cityId || !conditions){
             throw ({ statusCode: 400, message: 'données manquantes pour créer une offre' });
+        }             
+        
+        //instancie offerHelper et vérification de la données avant la créatrion de l'offre
+        const offerHelper = new OfferHelper(userId, storeId, requestRoleId);
+        const beforeCreateOffer = await offerHelper.beforeCreateOffer(conditions);    
+        
+        //echec vérification
+        if(!beforeCreateOffer){
+            throw ({ statusCode: 403, message: 'vous ne pouvez pas executer cette action' });
         }
 
-        //récupération du store
-        const store = await Store.findByPk(storeId);
-
-        //pas de résulat
-        if(!store){
-            throw ({ statusCode: 404, message: 'le commerce recherché n\'existe pas' });
-        }
-
-        //Vérification si l'action est autorisé
-        if(!belongTo(userId, store.user_id, requestRoleId)){
-            throw ({ statusCode: 403, message: 'vous n\'êtes pas autorisé à faire cette action' });
-        }
-       
         //création de l'offre
         const offer = await Offer.create({
             name,
@@ -44,24 +39,14 @@ module.exports = {
             user_id: userId,
             city_id: cityId           
 
-        });
+        });    
+        
+        if(!offer){
+            throw ({ statusCode: 500, message: 'echec d\'enregistrement de votre offre' });
+        }
 
-        //Ajout de la liste des conditions
-        await (async()=>{
-            /** stocks les promesses */
-            const promises = [];
-            conditions.forEach(async(condition)=>{   
-                //verification condition
-                const query =  ConditionOffer.create({
-                    condition_id: condition,
-                    offer_id: offer.id
-                });
-
-                promises.push(query);
-            });
-            /** résolution des promesses */
-            await Promise.all(promises);
-        })();
+        //ajout des nouvelles conditions
+        await offerHelper.addCondition(offer, conditions);
 
         res.status(201).json({
             offer,
@@ -73,23 +58,18 @@ module.exports = {
      * update d'une offre
      */
     updateOfferById: async(req, res, next)=>{
+        //roleId de la personne que effectue la requete
+        const requestRoleId = req.payload.data.roleId;
+
         //id de l'offre
-        const offerId = req.params.offerId;        
+        const offerId = req.params.offerId;                
 
-        //données à modifier
-        const { name, userId, presentation, imageName } = req.body;
+        //données de l'offre à modifier
+        const { name, userId, presentation, imageName, conditions, storeId } = req.body;
 
-        //recherche de l'offre
-        const offer = await Offer.findByPk(offerId);
-
-        if(!offer){
-            throw ({ statusCode: 404, message: 'l\'offre recherchée n\'existe pas' });
-        }
-
-        //Vérification si l'action est autorisé
-        if(!belongTo(userId, offer.user_id, req.payload.data.roleId)){
-            throw ({ statusCode: 403, message: 'vous n\'êtes pas autorisé à faire cette action' });
-        }
+        //instancie et vérification des données avant de faire un update    
+        const offerHelper = new OfferHelper(userId, storeId, requestRoleId);
+        let offer = await offerHelper.beforeUpdateOffer(offerId, conditions);
 
         //données a modifier
         const data = { ...offer, ...{name, presentation, image_url: imageName }};
@@ -97,9 +77,20 @@ module.exports = {
         //mise a jour des données
         await offer.update({
             ...data
-        });
+        });  
+        
+        //Suppression des anciennes conditions de l'offre
+        await offerHelper.deleteCondition(offerId);
+
+        //ajout des nouvelles conditions
+        await offerHelper.addCondition(offer, conditions);
+
+
+        //récupération de l'offre à jour
+        offer = await Offer.findByPk(offerId);
 
         res.json({
+            offer,
             message: 'votre offre est mise à jour'
         });
     },
@@ -180,23 +171,17 @@ module.exports = {
     deleteOfferById: async(req, res, next)=>{
         //id de l'offre
         const offerId = req.params.offerId; 
+
+        //roleId de la personne que effectue la requete
+        const requestRoleId = req.payload.data.roleId;
         
         //id du professionnel
-        const userId = req.body;
+        const { userId, storeId } = req.body;
         
-        //recherche de l'offre
-        const offer = await Offer.findByPk(offerId);
-
-        //vérification existance de l'offre
-        if(!offer){
-            throw ({ statusCode: 404, message: 'cette offre n\'existe pas en base de données' });
-        }
-
-        //Vérification si l'action est autorisé
-        if(!belongTo(userId, offer.user_id, req.payload.data.roleId)){
-            throw ({ statusCode: 403, message: 'vous n\'êtes pas autorisé à faire cette action' });
-        }
-
+        //instancie offerHelper et vérifie les données sur l'offre
+        const offerHelper = new OfferHelper(userId, storeId, requestRoleId);
+        const offer = await offerHelper.beforeDestroyOffer(offerId);
+        
         //destruction de l'offre
         await offer.destroy();
 
@@ -210,7 +195,7 @@ module.exports = {
      */
     clientGenerateTokenByOfferId:async(req, res, next)=>{
         //id utilisateur générant le token 
-        const userId = req.body.userId;
+        const userId = req.params.userId;
 
         //id de l'offre recevant le token
         const offerId = req.params.offerId;
@@ -237,15 +222,17 @@ module.exports = {
         });
 
         //génération d'un token unique liant le client à l'offre        
-        let token = await randomToken(5);        
+        const token = await OfferHelper.checkOfferToken(['7pgqd', 'xuqz8', 'tam28', 'trcc0','l8fds','e20h7','h26jh']);
         
-        //Vérification token unique pour l'offre concernée
-        if(offerHelper.checkOfferToken(offers, token)){
-            token = await randomToken(5);
-        }
+        //ajout du token + id utilisateur en base de données
+        const addToken = await offer.addUsers(user, {
+            through:{
+                token
+            }
+        });
 
         res.json({
-            token
+            addToken
         });
     },
 

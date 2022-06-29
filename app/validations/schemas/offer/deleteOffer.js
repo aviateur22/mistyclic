@@ -21,5 +21,15 @@ module.exports = Joi.object({
             'number.base': 'le format de l\'identifiant utilisateur est incorrect',
             'any.required': 'l\'identifiant utilisateur est manquant',
             'string.empty': 'l\'identifiant utilisateur est manquant'
-        })
+        }),
+
+    //id du store
+    storeId: Joi
+        .number()
+        .required()
+        .messages({
+            'number.base': 'l\'identifiant du commerçe n\'est pas correct',
+            'string.empty': 'l\'identifiant du commerce est obligatoire',
+            'any.required': 'l\'identifiant du commerce est obligatoire'
+        }),
 });

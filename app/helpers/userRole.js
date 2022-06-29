@@ -1,12 +1,15 @@
 
 const userRole = {
     //itilisateur connecté
-    user : '1',
+    user: 1,
+
+    //collaborateur d'un pro
+    collaborator: 2,
 
     //professionel
-    professional :'2',
+    professional: 3,
 
     //administrateur
-    admin :'3'
+    admin: 4
 };
 module.exports = userRole;

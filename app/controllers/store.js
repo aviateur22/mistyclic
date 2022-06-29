@@ -1,5 +1,6 @@
 const { Store, User} = require('../models');
 const belongTo = require('../helpers/belongTo');
+const userRole = require('../helpers/userRole');
 /**
  * store Controller
  */
@@ -22,8 +23,12 @@ module.exports = {
             throw ({ statusCode: 404, message: 'utilisateur non présent en base de données' });
         }
 
+        if(user.role_id < userRole.admin){
+            throw ({ statusCode: 403, message: 'vous ne pouvez pas créer de commerce' });
+        }
+
         //création du store
-        const createStore = await Store.create({
+        const store = await Store.create({
             name: name,
             presentation: presentation,
             image_url: imageName,
@@ -36,6 +41,7 @@ module.exports = {
         });
 
         res.status(201).json({
+            store,
             message: 'votre commerce est créé'
         });
     },

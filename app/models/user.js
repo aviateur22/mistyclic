@@ -8,7 +8,7 @@ User.init({
     email: DataTypes.STRING,
     password: DataTypes.STRING,
     active_account: DataTypes.BOOLEAN,
-    actice_professional: DataTypes.BOOLEAN
+    active_professional: DataTypes.BOOLEAN
 },{
     sequelize,
     tableName:'user'

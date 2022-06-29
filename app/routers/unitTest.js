@@ -13,10 +13,13 @@ const authController = require('../../tests/cookieAuth/generateCookieAuth');
 const controllerHandler = require('../helpers/controllerHandler');
 
 //génération d'un cookie auth avec le role professionnel
-router.get('/cookie-auth', controllerHandler(authController(2)));
+router.get('/cookie-auth-pro', controllerHandler(authController(3)));
 
-//génération cookie pour un utilisateur
+//génération cookie avec le role d'un utilisateur
 router.get('/cookie-auth-user', controllerHandler(authController(1)));
+
+//génération cookie avec le role admin
+router.get('/cookie-auth-admin', controllerHandler(authController(4)));
 
 router.get('/cookie-csurf', controllerHandler(tokenController.getToken(jwtExpireIn.testTime)));
 

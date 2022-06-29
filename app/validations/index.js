@@ -6,8 +6,10 @@
  */
 module.exports = (schema, prop)=>async(req, res, next)=>{
     try {
-        //Validation des données
-        console.log(req[prop])
+        //Validation des données        
+        if(!prop){
+            return console.log('prop manquant pour validation de la donnée');
+        }
         await schema.validateAsync(req[prop]);        
         next();        
     } catch (error) {           

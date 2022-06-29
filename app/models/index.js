@@ -78,13 +78,11 @@ Zip.hasMany(City,{
 
 //utilisateur - offer
 User.belongsToMany(Offer,{
-    through: OfferUser,
-    as: 'usersHasOffers'
+    through: OfferUser
 });
 
 Offer.belongsToMany(User, {
-    through: OfferUser,
-    as: 'offersHasUsers'
+    through: OfferUser
 });
 
 User.hasMany(Offer,{
@@ -111,14 +109,13 @@ Store.hasMany(Offer, {
 
 //offer - conditions
 Offer.belongsToMany(Condition,{
-    through: ConditionOffer,
-    as: 'offersHasConditions'
+    through: 'ConditionOffer',
+    
 
 });
 
 Condition.belongsToMany(Offer,{
-    through: ConditionOffer,
-    as: 'conditionsHasOffers'
+    through: 'ConditionOffer',
 });
 
 //offre-ville

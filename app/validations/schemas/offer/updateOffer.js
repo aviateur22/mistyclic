@@ -42,5 +42,46 @@ module.exports = Joi.object({
             'string.empty': 'l\'ajout d\'une image est obligatoire',
             'any.required': 'l\'ajout d\'une image est obligatoire',
         }),
+    
+    //id du commercant    
+    userId: Joi
+        .number()
+        .required()
+        .messages({
+            'number.base': 'l\'identifiant du commerçant n\'est pas correct',
+            'string.empty': 'l\'identifiant du commerçant est obligatoire',
+            'any.required': 'l\'identifiant du commerçant est obligatoire'
+        }),
+        
+    //id du store
+    storeId: Joi
+        .number()
+        .required()
+        .messages({
+            'number.base': 'l\'identifiant du commerçe n\'est pas correct',
+            'string.empty': 'l\'identifiant du commerce est obligatoire',
+            'any.required': 'l\'identifiant du commerce est obligatoire'
+        }),
+
+    //condition pour récupérer l'offre
+    conditions: Joi
+        .array()
+        .items(Joi.number().messages({
+            'number.base': 'l\'identifiant des conditions n\'est pas correcte'
+        }))
+        .min(1)
+        .messages({
+            'array.base': 'l\'identifiant des conditions n\'est pas correcte',
+            'array.min': 'sélectionner au moins une condition'
+        }),
+    
+    /** csurf token */
+    token: Joi
+        .string()
+        .required()
+        .messages({
+            'string.empty': 'token',
+            'any.required': 'token'  
+        })
    
 });

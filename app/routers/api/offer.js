@@ -33,10 +33,11 @@ router.post('/',
 router.patch('/:offerId', 
     multer.none(),
     validation(offerSchema.offerIdSchema, 'params'),
-    validation(offerSchema.updateOfferSchema),
+    validation(offerSchema.updateOfferSchema,'body'),
     controllerHandler(cookie),
     controllerHandler(authorization),    
     controllerHandler(validateCsurfToken),    
+    controllerHandler(userPrivilege(userRole.professional)),   
     controllerHandler(offerController.updateOfferById));
 
 //récupération de toutes les lecons
