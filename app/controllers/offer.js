@@ -1,5 +1,6 @@
 const { Offer, User, Store, Condition, OfferUser, ConditionOffer } = require('../models');
 const OfferHelper = require('../helpers/controllerHelper/offer');
+
 /**
  * offer Controller
  */
@@ -238,17 +239,21 @@ module.exports = {
 
         //Vérification de la données avant la récupération des token
         const offerHelper = new OfferHelper(userId, storeId, requestRoleId);
+        const offers = await offerHelper.beforeGetAllTokenByOfferId(offerId);
 
-        const tokens = await OfferUser.findAll({
-            where: {
-                offer_id: offerId
-            }
+        //Filtrage des données 
+        const tokenData = offers?.Users.map(user=>{
+            const userData = {};
+            userData.userId = user.id;
+            userData.email = user.email;
+            userData.token = user.offerUser.token;
+            return userData;
         });
-        
-        const store = await offerHelper.beforeGetAllTokenByOfferId(offerId);
 
-        return res.json({
-            tokens
+        return res.json({           
+            tokenData,
+            offerId: offers.id
+
         });
     },
 

@@ -17,12 +17,20 @@ class MainHelper {
     /**
      * vérifie existance d'une offre
      * @param {Number} offerId - id de l'offre
+     * @param {Object} includeModel - model a recuperer
      * @returns {Object} offer - renvoie l'offre
      */
-    async getOffer(offerId){
-        //recherche de l'offre
-        const offer = await Offer.findByPk(offerId);
-
+    async getOffer(offerId, includeModel){
+        //recherche de l'offre       
+        let offer;
+        if(includeModel){
+            offer = await Offer.findByPk(offerId, {
+                include: { model: includeModel.modelName }
+            });
+        } else {
+            offer = await Offer.findByPk(offerId);
+        }
+       
         //offre pas trouvé
         if(!offer){
             throw ({ statusCode: 404, message: 'l\'offre recherchée n\'existe pas' });
@@ -153,7 +161,6 @@ class MainHelper {
 
         return true;
     }
-
         
     /**
      * 

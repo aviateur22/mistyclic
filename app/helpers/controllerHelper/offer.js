@@ -1,4 +1,4 @@
-const {Offer, Store, Condition, ConditionOffer, User } = require('../../models');
+const {Offer, Store, Condition, ConditionOffer, User, OfferUser } = require('../../models');
 const MainHelper = require('./mainHelper');
 const randomGenerator = require('../security/generateToken');
 const userRole = require('../userRole');
@@ -140,6 +140,11 @@ class OfferHelper extends MainHelper {
         });
     }
 
+    /**
+     * vérification subscription offer
+     * @param {Number} offerId - id de l'offre
+     * @returns {Object} store - le store
+     */
     async beforeGetAllTokenByOfferId(offerId){
         //on vérifie le user
         const user = await super.getUser();
@@ -154,7 +159,7 @@ class OfferHelper extends MainHelper {
         super.storeBelongToProfessional(store);
 
         //on vérifie que l'offre existe
-        const offer = await super.getOffer(offerId);
+        const offer = await super.getOffer(offerId, { modelName: User });
 
         //on vérifie que l'offre est rattaché au commerce
         await super.offerBelongToStore(store, offerId);
@@ -162,10 +167,13 @@ class OfferHelper extends MainHelper {
         //on verifie que l'offre est rattaché au professionelle
         super.offerBelongToProfessional(offer);
 
+        //suppression des subscriptions expired
+        await this.#removeSubscriptionOffer(offerId);
+
         //Vérification authorisation modification/création
         super.authorizationUpdateData(user.id, userRole.collaborator);
 
-        return store;
+        return offer;
     }
 
     /**
@@ -228,6 +236,33 @@ class OfferHelper extends MainHelper {
             if(!findCondition){
                 throw ({ statusCode: 404, message: 'la conditon renseignée n\'existe pas' });
             }        
+        }
+    }
+
+    /**
+     * Suppression des subscriptions expirées
+     * @param {Number} offerId - id de l'offre
+     */
+    async #removeSubscriptionOffer(offerId){
+        //recherche de toutes les subscription reliées a offerId
+        const subscriptions = await OfferUser.findAll({
+            where: {
+                offer_id: offerId
+            }
+        });
+
+        //enregistrement de l'heure actuelle
+        const actualTime = new Date().getTime();
+        
+        for(const subscription of subscriptions){
+            //récupération de l'heure de subscription d'une offre
+            let offerSubscriptionTime = subscription.updated_at ?  subscription.updated_at.getTime() :  subscription.created_at.getTime();
+            
+            //Une subscription est valide 10 min
+            if(Math.abs(offerSubscriptionTime - actualTime) > 10 * 60000){
+                //suppresion si > 10 min
+                await subscription.destroy();
+            }
         }
     }
 }

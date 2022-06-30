@@ -37,7 +37,7 @@ Content-Type: application/json
 }
 
 ### modification d'un offre
-PATCH {{uri}}/api/offers/2
+PATCH {{uri}}/api/offers/3
 Cookie: {{cookie_csurf}}
 Cookie: {{cookie_auth_admin}}
 Content-Type: application/json
@@ -47,7 +47,7 @@ Content-Type: application/json
     "name": "mes fleurs à vendres pour pas chers",
     "presentation": "pour l'achat de 2 roses, vous bénificié d'un remboursement immédiat de 0.50€",    
     "imageName": "fleur.jpg",
-    "userId": "2",
+    "userId": "3",
     "storeId": "1",
     "conditions": [2]
 }
@@ -79,6 +79,6 @@ Content-Type: application/json
 }
 
 ### généraion de token
-GET  {{uri}}/api/offers/generate-token-by-offer/token/{{token}}/user/4/store/1/offer/3
+GET  {{uri}}/api/offers/generate-token-by-offer/token/{{token}}/user/3/store/1/offer/3
 Cookie: {{cookie_csurf}}
 Cookie: {{cookie_auth_pro}}
