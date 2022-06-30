@@ -18,67 +18,39 @@
 @wrong_token = "eyJjb250ZW50Ijoiem1ibC9QUkF6N2hUV0JPTm5kaTQyTmhFdENSZEEzK2RTcE9HUGYrc0dWVHZOQ2hGZ3FpMWVNTTNZc2JRN3NyZSJ8"
 
 ### Ajout d'une offre
-POST {{uri}}/api/offers/
-Cookie: {{cookie_csurf}}
-Cookie: {{cookie_auth_pro}}
-Content-Type: application/json
-
-{
-    "token": {{token}},    
-    "name": "mes fleurs à vendres pour pas chers",
-    "presentation": "pour l'achat de 2 roses, vous bénificié d'un remboursement immédiat de 0.50€",
-    "globalRefund": "499",
-    "individualRefund": "0.50",
-    "imageName": "fleur.jpg",
-    "userId": "3",
-    "storeId": "1",
-    "cityId": "1",
-    "conditions": [1,2,3]
-}
-
-### modification d'un offre
-PATCH {{uri}}/api/offers/2
-Cookie: {{cookie_csurf}}
-Cookie: {{cookie_auth_admin}}
-Content-Type: application/json
-
-{
-    "token": {{token}},    
-    "name": "mes fleurs à vendres pour pas chers",
-    "presentation": "pour l'achat de 2 roses, vous bénificié d'un remboursement immédiat de 0.50€",    
-    "imageName": "fleur.jpg",
-    "userId": "2",
-    "storeId": "1",
-    "conditions": [2]
-}
-
-### récupération d'une offre
-GET {{uri}}/api/offers/2
-
-### récupération de toutes les offres
-GET {{uri}}/api/offers
-
-### récupération des offres par ville
-GET {{uri}}/api/offers/by-city/2
-
-### récupération des tokens par id de l'offre
-GET {{uri}}/api/offers/get-tokens-by-offer/token/{{token}}/user/3/store/1/offer/3
-Cookie: {{cookie_csurf}}
-Cookie: {{cookie_auth_admin}}
-
-###suppression d'une offre
-DELETE {{uri}}/api/offers/2
+POST {{uri}}/api/stores/
 Cookie: {{cookie_csurf}}
 Cookie: {{cookie_auth_admin}}
 Content-Type: application/json
 
 {
     "token": {{token}},
+    "name": "saucisson et mais",
+    "presentation": "ma bonne boucherie",
+    "street": "32 bis chemin des fageolle",
+    "phone": "06 23 27 41 06",
+    "imageName": "mon magasin .jpg",
     "userId": "3",
-    "storeId": "1" 
+    "email": "bonjour@hotmail.fr",
+    "cityId": "1",
+    "typeId": "2"
 }
 
-### généraion de token
-GET  {{uri}}/api/offers/generate-token-by-offer/token/{{token}}/user/4/store/1/offer/3
+### modification d'un offre
+PATCH {{uri}}/api/stores/2
 Cookie: {{cookie_csurf}}
-Cookie: {{cookie_auth_pro}}
+Cookie: {{cookie_auth_admin}}
+Content-Type: application/json
+
+{
+    "token": {{token}},
+    "name": "Toto Fleur H24 - jour et nuit",
+    "presentation": "Manasin de fleur magnifique",
+    "street": "32 bis chemin des fageolle",
+    "phone": "06 23 27 41 06",
+    "imageName": "mon magasin .jpg",
+    "userId": "3",
+    "email": "bonjour@hotmail.fr",
+    "cityId": "1",
+    "typeId": "1"
+}

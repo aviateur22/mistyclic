@@ -69,23 +69,23 @@ router.delete('/:offerId',
     controllerHandler(offerController.deleteOfferById));
 
 // génération token 5 lettres par un client
-router.get('/generate-token/:offerId/token/:token/user/:userId',
+router.get('/generate-token-by-offer/token/:token/user/:userId/store/:storeId/offer/:offerId',
     multer.none(),    
     validation(offerSchema.generateTokenSchema, 'params'),
     controllerHandler(cookie),
     controllerHandler(authorization),
     controllerHandler(validateCsurfToken),
     controllerHandler(userPrivilege(userRole.user)),    
-    controllerHandler(offerController.clientGenerateTokenByOfferId));
+    controllerHandler(offerController.clientSubscribeByOfferId));
 
-//Récupérations de tous les token pour une offres
-router.get('/tokens/:offerId',
+//Récupérations de tous les tokens pour une offres
+router.get('/get-tokens-by-offer/token/:token/user/:userId/store/:storeId/offer/:offerId',
     multer.none(),    
+    validation(offerSchema.getOfferTokenSchema, 'params'),
     controllerHandler(cookie),
     controllerHandler(authorization),    
     controllerHandler(validateCsurfToken),
-    controllerHandler(userPrivilege(userRole.professional)),
-    validation(offerSchema.offerIdSchema, 'params'),
+    controllerHandler(userPrivilege(userRole.professional)),    
     controllerHandler(offerController.getAllTokenByOfferId),
 );
 

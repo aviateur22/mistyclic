@@ -1,18 +1,15 @@
-/**
- * validation des données pour génération d'un token
- */
+const Joi =  require('joi');
 
-const Joi = require('joi');
-
+/**validation des données ppur récuperer les tokens */
 module.exports = Joi.object({
-    //id client générant le token
-    userId: Joi
-        .number()
+
+    /** csurf token */
+    token: Joi
+        .string()
         .required()
         .messages({
-            'number.base': 'le format de l\'identifiant utilisateur n\'est pas correct',
-            'any.required': 'l\'identifiant utilisateur est manquant',
-            'string.empty': 'l\'identifiant utilisateur est manquant'
+            'string.empty': 'token',
+            'any.required': 'token'  
         }),
 
     // id offer recevant le token
@@ -24,7 +21,17 @@ module.exports = Joi.object({
             'any.required': 'l\'identifiant de l\'offre est obligatoire',
             'string.empty': 'l\'identifiant de l\'offre est obligatoire'            
         }),
-    
+        
+    //id du commercant    
+    userId: Joi
+        .number()
+        .required()
+        .messages({
+            'number.base': 'l\'identifiant du commerçant n\'est pas correct',
+            'string.empty': 'l\'identifiant du commerçant est obligatoire',
+            'any.required': 'l\'identifiant du commerçant est obligatoire'
+        }),
+
     // id offer recevant le token
     storeId: Joi
         .number()
@@ -34,16 +41,4 @@ module.exports = Joi.object({
             'any.required': 'l\'identifiant du commerce est obligatoire',
             'string.empty': 'l\'identifiant du commerce est obligatoire'            
         }),
-
-    /** csurf token */
-    token: Joi
-        .string()
-        .required()
-        .messages({
-            'string.empty': 'token',
-            'any.required': 'token'  
-        })
-        
-    
-    
 });

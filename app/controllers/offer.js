@@ -1,6 +1,5 @@
 const { Offer, User, Store, Condition, OfferUser, ConditionOffer } = require('../models');
-const OfferHelper = require('../helpers/controllerHelper/offer/offer');
-const userRole = require('../helpers/userRole');
+const OfferHelper = require('../helpers/controllerHelper/offer');
 /**
  * offer Controller
  */
@@ -19,12 +18,12 @@ module.exports = {
             throw ({ statusCode: 400, message: 'données manquantes pour créer une offre' });
         }             
         
-        //instancie offerHelper et vérification de la données avant la créatrion de l'offre
-        const offerHelper = new OfferHelper(userId, storeId, requestRoleId);
-        const beforeCreateOffer = await offerHelper.beforeCreateOffer(conditions);    
+        //Vérification de la données avant la créatrion de l'offre
+        const offerHelper = new OfferHelper(userId, storeId, requestRoleId);        
+        const createOffer = await offerHelper.beforeCreateOffer(conditions);    
         
         //echec vérification
-        if(!beforeCreateOffer){
+        if(!createOffer){
             throw ({ statusCode: 403, message: 'vous ne pouvez pas executer cette action' });
         }
 
@@ -67,11 +66,11 @@ module.exports = {
         //données de l'offre à modifier
         const { name, userId, presentation, imageName, conditions, storeId } = req.body;
 
-        //instancie et vérification des données avant de faire un update    
+        //Vérification de la données avant la modification de l'offre  
         const offerHelper = new OfferHelper(userId, storeId, requestRoleId);
         let offer = await offerHelper.beforeUpdateOffer(offerId, conditions);
 
-        //données a modifier
+        //données à modifier
         const data = { ...offer, ...{name, presentation, image_url: imageName }};
 
         //mise a jour des données
@@ -84,7 +83,6 @@ module.exports = {
 
         //ajout des nouvelles conditions
         await offerHelper.addCondition(offer, conditions);
-
 
         //récupération de l'offre à jour
         offer = await Offer.findByPk(offerId);
@@ -178,7 +176,7 @@ module.exports = {
         //id du professionnel
         const { userId, storeId } = req.body;
         
-        //instancie offerHelper et vérifie les données sur l'offre
+        //Vérification de la données avant la suppression de l'offre
         const offerHelper = new OfferHelper(userId, storeId, requestRoleId);
         const offer = await offerHelper.beforeDestroyOffer(offerId);
         
@@ -193,28 +191,20 @@ module.exports = {
     /**
      * génération d'un token pour une offre par un client
      */
-    clientGenerateTokenByOfferId:async(req, res, next)=>{
+    clientSubscribeByOfferId:async(req, res, next)=>{
+        //roleId de la personne que effectue la requete
+        const requestRoleId = req.payload.data.roleId;
+
         //id utilisateur générant le token 
-        const userId = req.params.userId;
+        const { userId, storeId, offerId } = req.params;
 
-        //id de l'offre recevant le token
-        const offerId = req.params.offerId;
+        //Vérification de la données avant la génération d'un token
+        const offerHelper = new OfferHelper(userId, storeId, requestRoleId);
 
-        //l'offre
-        const offer = await Offer.findByPk(offerId);
-
-        if(!offer){
-            throw ({statusCode: 404, message: 'l\'offre recherchée n\'existe pas'});
-        }
-
-        //recherche du client
-        const user = await User.findByPk(userId);
-
-        if(!user){
-            throw ({ statusCode: 404, message: 'l\'utilisateur concerné n\'existe pas'});
-        }       
-
-        //recherche des offres validé par des clients
+        //récupération de offer et user       
+        const { offer, user } = await offerHelper.beforeGenerateToken(offerId);
+       
+        //recherche de toutes offres validés par des clients
         const offers = await OfferUser.findAll({
             where:{
                 offer_id: offerId                
@@ -222,7 +212,7 @@ module.exports = {
         });
 
         //génération d'un token unique liant le client à l'offre        
-        const token = await OfferHelper.checkOfferToken(['7pgqd', 'xuqz8', 'tam28', 'trcc0','l8fds','e20h7','h26jh']);
+        const token = await OfferHelper.checkOfferToken(offers);
         
         //ajout du token + id utilisateur en base de données
         const addToken = await offer.addUsers(user, {
@@ -239,8 +229,27 @@ module.exports = {
     /**
      * Récupération de tous les tokens actifs
      */
-    getAllTokenByOfferId:()=>{
+    getAllTokenByOfferId: async(req, res, next)=>{
+        //roleId de la personne que effectue la requete
+        const requestRoleId = req.payload.data.roleId;
 
+        //id de l'offre concerné
+        const { userId, storeId, offerId } = req.params;
+
+        //Vérification de la données avant la récupération des token
+        const offerHelper = new OfferHelper(userId, storeId, requestRoleId);
+
+        const tokens = await OfferUser.findAll({
+            where: {
+                offer_id: offerId
+            }
+        });
+        
+        const store = await offerHelper.beforeGetAllTokenByOfferId(offerId);
+
+        return res.json({
+            tokens
+        });
     },
 
     /**

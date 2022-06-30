@@ -39,7 +39,7 @@ INSERT INTO "user"("email", "password","role_id","city_id") VALUES
 ('admin@hot.fr', 'aaaa','4', '2');
 
 INSERT INTO "store"("name","presentation", "image_url", "street", "phone", "email", "user_id", "city_id", "type_id") VALUES
-('chez paulo', 'épicerie fine, avec produits du terroir', 'maphoto.jpg', '48 avenu des jambon', '06 23 27 41 01', 'moncommerce@hot.fr', '2', '1', '1'),
-('toto', 'viande et charcuterie faite maison', 'maphoto.jpg', '48 avenu des jambon', '06 23 27 41 01', 'moncommerce@hot.fr', '2', '2', '2');
+('chez paulo', 'épicerie fine, avec produits du terroir', 'maphoto.jpg', '48 avenu des jambon', '06 23 27 41 01', 'moncommerce@hot.fr', '3', '1', '1'),
+('toto', 'viande et charcuterie faite maison', 'maphoto.jpg', '48 avenu des jambon', '06 23 27 41 01', 'moncommerce@hot.fr', '3', '2', '2');
 
 COMMIT;
