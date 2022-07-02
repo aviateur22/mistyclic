@@ -9,5 +9,4 @@ const schemaValidation = require('../../validations');
 const professionalSchema = require('../../validations/schemas/professional');
 const controllerHandler = require('../../helpers/controllerHandler');
 
-
 module.exports = router;

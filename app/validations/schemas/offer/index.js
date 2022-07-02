@@ -10,6 +10,10 @@ const validateOfferTokenSchema = require('./validateOfferToken');
 const storeIdSchema = require('./storeId');
 const cityIdSchema = require('./cityId');
 const getOfferTokenSchema = require('./getOfferTokens');
+const userOffersSchema = require('./userOffer');
+const professionalStoreOffer = require('./professionalStoreOffer');
+const refundOfferSchema = require('./refundOffer');
+const refundCodeSchema = require('./refundCode');
  
 module.exports = {
     createOfferSchema,
@@ -20,5 +24,9 @@ module.exports = {
     validateOfferTokenSchema,
     cityIdSchema,
     storeIdSchema,
-    getOfferTokenSchema
+    getOfferTokenSchema,
+    userOffersSchema,
+    professionalStoreOffer,
+    refundOfferSchema,
+    refundCodeSchema
 };

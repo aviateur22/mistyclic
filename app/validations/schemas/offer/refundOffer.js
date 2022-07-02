@@ -5,16 +5,17 @@
 const Joi = require('joi');
 
 module.exports = Joi.object({
-    //id client générant le token
-    userId: Joi
+    // id du store id offer recevant le token
+    storeId: Joi
         .number()
         .required()
         .messages({
-            'number.base': 'le format de l\'identifiant de l\'offre est incorrect',
-            'any.required': 'l\'identifiant de l\'offre est manquant',
-            'string.empty': 'l\'identifiant de l\'offre est manquant'
+            'number.base': 'le format de l\'identifiant du commerce n\'est pas correct',
+            'any.required': 'l\'identifiant du commerce est obligatoire',
+            'string.empty': 'l\'identifiant du commerce est obligatoire'            
         }),
-
+    
+    // token
     tokenOffer: Joi
         .string()
         .max(5)

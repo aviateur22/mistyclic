@@ -1,5 +1,5 @@
-const { Offer, User, Store, Condition, OfferUser, ConditionOffer } = require('../models');
 const OfferHelper = require('../helpers/controllerHelper/offer');
+const userRole = require('../helpers/userRole');
 
 /**
  * offer Controller
@@ -21,7 +21,7 @@ module.exports = {
         
         //Vérification de la données avant la créatrion de l'offre
         const offerHelper = new OfferHelper(userId, storeId, requestRoleId);        
-        const createOffer = await offerHelper.beforeCreateOffer(conditions);    
+        const createOffer = await offerHelper.beforeCreateOffer(conditions);            
         
         //echec vérification
         if(!createOffer){
@@ -29,21 +29,16 @@ module.exports = {
         }
 
         //création de l'offre
-        const offer = await Offer.create({
+        const offer = await offerHelper.createOffer({
             name,
             presentation,
-            global_refund: globalRefund,
-            individual_refund: individualRefund,
-            image_url: imageName,
-            store_id: storeId,
-            user_id: userId,
-            city_id: cityId           
-
+            globalRefund,
+            individualRefund,
+            imageName,
+            storeId,
+            userId,
+            cityId
         });    
-        
-        if(!offer){
-            throw ({ statusCode: 500, message: 'echec d\'enregistrement de votre offre' });
-        }
 
         //ajout des nouvelles conditions
         await offerHelper.addCondition(offer, conditions);
@@ -74,19 +69,18 @@ module.exports = {
         //données à modifier
         const data = { ...offer, ...{name, presentation, image_url: imageName }};
 
+
         //mise a jour des données
-        await offer.update({
-            ...data
-        });  
+        const updateOffer = await offerHelper.updateOffer(offer, data);  
         
         //Suppression des anciennes conditions de l'offre
-        await offerHelper.deleteCondition(offerId);
+        await offerHelper.deleteCondition(updateOffer.id);
 
         //ajout des nouvelles conditions
-        await offerHelper.addCondition(offer, conditions);
+        await offerHelper.addCondition(updateOffer, conditions);
 
         //récupération de l'offre à jour
-        offer = await Offer.findByPk(offerId);
+        offer = await offerHelper.findOfferById(offerId);
 
         res.json({
             offer,
@@ -100,14 +94,10 @@ module.exports = {
     getOfferById: async(req, res, next)=>{
         //id de l'offre
         const offerId = req.params.offerId;    
-        
-        //recherche de l'offre
-        const offer = await Offer.findByPk(offerId);
 
-        //vérification existance de l'offre
-        if(!offer){
-            throw ({ statusCode: 404, message: 'l\'offre recherchée n\'existe pas'});
-        }
+        //recherche de l'offre        
+        const offerHelper = new OfferHelper();
+        const offer = await offerHelper.findOfferById(offerId);
 
         res.json({
             offer
@@ -118,9 +108,10 @@ module.exports = {
      * Récupération de toutes les offres
      */
     getOffers:async(req, res, next)=>{
-        //récupération des offres
-        const offers = await Offer.findAll();
-
+        //recherche des offres
+        const offerHelper = new OfferHelper();
+        const offers = await offerHelper.findOffers();
+        
         res.json({
             offers
         });
@@ -133,12 +124,13 @@ module.exports = {
         //id de la ville
         const cityId = req.params.cityId;
 
-        //récupération de toutes les offres de la ville
-        const offers = await Offer.findAll({
-            where:{
-                city_id: cityId
-            }
-        });
+        //recherche des offres de la ville
+        const offerHelper = new OfferHelper();
+        const param = [
+            {city_id: cityId}   
+        ];   
+
+        const offers = await offerHelper.findOffers(param);
 
         res.json({
             offers
@@ -148,16 +140,81 @@ module.exports = {
     /**
      * récupération des offres d'un commerce
      */
-    getOffersByStore:async(req, res, next)=>{
+    getOffersByStore:(allOffer)=>async(req, res, next)=>{  
+        //roleId de la personne que effectue la requete
+        const requestRoleId = req.payload.data.roleId;
+
         //id du commerce
         const storeId = req.params.storeId;
 
-        //récupération de toutes les offres de la ville
-        const offers = await Offer.findAll({
-            where:{
-                store_id: storeId
-            }
+        //paramètre de la requête      
+        let param;
+
+        let offerHelper;
+
+        //Seule les professionnels peuvent avoir accès aux offres inactives
+        if(allOffer){
+            //id du professionel
+            const userId = req.params.userId;  
+            
+            //vérification des droits d'accès
+            offerHelper = new OfferHelper(userId, storeId, requestRoleId);     
+            await offerHelper.beforeProfessionalGetOffers(userRole.professional);
+
+            //paramatres du filtre
+            param = [
+                {store_id: storeId}   
+            ];            
+        } else {
+            offerHelper = new OfferHelper(null, storeId, requestRoleId);  
+            
+            //paramatres du filtre
+            param = [            
+                {is_active: true},    
+                {store_id: storeId}   
+            ];
+        }   
+
+        //récupération des offres liées aux commerces
+        const offers = await offerHelper.findOffers(param);
+
+        res.json({
+            offers
         });
+    },
+
+    /**
+     * Récupération des offres par id utilisateur
+     * @param {Boolean} allOffer  - affichage de toutes offres active ou non active (pour un professionnel)
+     * @returns 
+     */
+    getOffersByUserId:(allOffer)=>async(req, res, next)=>{
+        //roleId de la personne que effectue la requete
+        const requestRoleId = req.payload.data.roleId;
+
+        //userId
+        const userId = req.params.userId;
+
+        //paramètre de la requête      
+        let paramRequest;
+
+        const offerHelper = new OfferHelper(userId, null, requestRoleId);
+
+        //Seule les professionnels peuvent avoir accès a toutes les offres
+        if(allOffer){
+            await offerHelper.beforeProfessionalGetOffers(userRole.professional);
+            paramRequest = [
+                {user_id: userId},    
+            ];            
+        } else {            
+            paramRequest = [
+                {user_id: userId},
+                {is_active: true}
+            ];
+        }   
+        
+        //récupération des offres liées aux userId
+        const offers = await offerHelper.getOffers(paramRequest);
 
         res.json({
             offers
@@ -181,11 +238,14 @@ module.exports = {
         const offerHelper = new OfferHelper(userId, storeId, requestRoleId);
         const offer = await offerHelper.beforeDestroyOffer(offerId);
         
-        //destruction de l'offre
-        await offer.destroy();
+        //mise a jour de la donnée        
+        const data = {...offer, ...{is_active: false}};
+
+        //supprssion de l'offre - pas is_active à false
+        await offerHelper.updateOffer(offer, data);        
 
         res.json({
-            message: 'votre offre est supprimée'
+            message: 'votre offre n\'est plus active'
         });
     },
 
@@ -206,24 +266,16 @@ module.exports = {
         const { offer, user } = await offerHelper.beforeGenerateToken(offerId);
        
         //recherche de toutes offres validés par des clients
-        const offers = await OfferUser.findAll({
-            where:{
-                offer_id: offerId                
-            }
-        });
+        const offers = await offerHelper.findOffers([{ id: offerId }]);
 
         //génération d'un token unique liant le client à l'offre        
-        const token = await OfferHelper.checkOfferToken(offers);
+        const refundCode = await offerHelper.checkOfferToken(offers);
         
         //ajout du token + id utilisateur en base de données
-        const addToken = await offer.addUsers(user, {
-            through:{
-                token
-            }
-        });
+        const addRefundCode = await offerHelper.clientSubscribeToOffer(offer, user, refundCode);
 
         res.json({
-            addToken
+            addRefundCode
         });
     },
 
@@ -242,7 +294,7 @@ module.exports = {
         const offers = await offerHelper.beforeGetAllTokenByOfferId(offerId);
 
         //Filtrage des données 
-        const tokenData = offers?.Users.map(user=>{
+        const tokenData = offers?.users.map(user=>{
             const userData = {};
             userData.userId = user.id;
             userData.email = user.email;
@@ -267,8 +319,33 @@ module.exports = {
     /**
      * activation du remboursement du client
      */
-    professionalValidateRefundByOfferId:()=>{
+    professionalValidateRefund:async(req, res, next)=>{
+        //récupérer le code promo de l'offre
+        const refundCode = req.params.refundCode;
 
+        //id du store
+        const storeId = req.body.storeId;
+
+        //roleId de la personne que effectue la requete
+        const requestRoleId = req.payload.data.roleId;
+
+        //vérification avant de valider le remboursement
+        const offerHelper = new OfferHelper(null, storeId, requestRoleId);
+        const { offer, client, subscription } = await offerHelper.beforeRefund(refundCode);
+
+        console.log(subscription);
+        
+        //ajout du remboursement effectif
+        const registerRefund = await offerHelper.registerRefund(offer, client.id, storeId);
+
+        //suppression de la souscription de l'offre
+        await offerHelper.deleteOfferSubscription(subscription);
+
+        res.json({
+            registerRefund,
+            globalRefund: offer.global_refund,
+            individualRefund: offer.individual_refund
+        });
     }
 
 };

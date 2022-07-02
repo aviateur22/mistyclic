@@ -1,15 +1,15 @@
 const sequelize = require('../database/client');
 const {DataTypes, Model} = require('sequelize');
 
-class offerUser extends Model{
+class Refund extends Model{
 }
 
-offerUser.init({
+Refund.init({
     user_id: DataTypes.INTEGER,
     offer_id: DataTypes.INTEGER,
-    refund_code: DataTypes.TEXT
+    store_id: DataTypes.INTEGER
 },{
     sequelize,
-    tableName:'offer_has_user'
+    tableName:'refund'
 });
-module.exports = offerUser;
+module.exports = Refund;

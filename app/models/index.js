@@ -8,7 +8,7 @@ const Store = require('./store');
 const Type = require('./type');
 const User = require('./user');
 const Zip = require('./zip');
-
+const Refund = require('./refund');
 //Utilisateur - role
 User.belongsTo(Role,{
     foreignKey: 'role_id',
@@ -78,11 +78,13 @@ Zip.hasMany(City,{
 
 //utilisateur - offer
 User.belongsToMany(Offer,{
-    through: OfferUser
+    through: OfferUser,
+    as: 'offers'
 });
 
 Offer.belongsToMany(User, {
-    through: OfferUser
+    through: OfferUser,
+    as: 'users'
 });
 
 User.hasMany(Offer,{
@@ -109,13 +111,11 @@ Store.hasMany(Offer, {
 
 //offer - conditions
 Offer.belongsToMany(Condition,{
-    through: 'ConditionOffer',
-    
-
+    through: 'ConditionOffer'
 });
 
 Condition.belongsToMany(Offer,{
-    through: 'ConditionOffer',
+    through: 'ConditionOffer'
 });
 
 //offre-ville
@@ -129,6 +129,17 @@ City.hasMany(Offer,{
     as: 'cityHasOffers'
 });
 
+//offre - utilisateur - remboursement client
+Offer.belongsToMany(User,{
+    through: Refund,
+    as: 'userRefunds'
+});
+
+User.belongsToMany(Offer,{
+    through: Refund,
+    as: 'offerRefunds'
+});
+
 module.exports = {
     City,
     Condition,
@@ -139,5 +150,6 @@ module.exports = {
     Store,
     Type,
     User,
-    Zip
+    Zip,
+    Refund
 };

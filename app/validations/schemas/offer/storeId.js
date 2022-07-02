@@ -4,7 +4,7 @@
 const Joi = require('joi');
 
 module.exports = Joi.object({   
-    // id offer recevant le token
+    // id du store
     storeId: Joi
         .number()
         .required()

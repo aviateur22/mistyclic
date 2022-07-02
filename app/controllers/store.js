@@ -1,4 +1,3 @@
-const { Store, User} = require('../models');
 const belongTo = require('../helpers/belongTo');
 const StoreHelper = require('../helpers/controllerHelper/store');
 
@@ -25,7 +24,7 @@ module.exports = {
         await storeHelper.beforeCreateStore(cityId, typeId);
 
         //création du store
-        const store = await Store.create({
+        const store = await storeHelper.createStore({
             name: name,
             presentation: presentation,
             image_url: imageName,
@@ -69,15 +68,10 @@ module.exports = {
         //mise a jour des données
         const data = {...store, ...{name, presentation, image_url: imageName, street, phone, email, city_id: cityId, type_id: typeId}};
 
-        await store.update({
-            ...data
-        });
-
-        //récupérartion du store
-        store = await Store.findByPk(storeId);
+        const updateStore = await storeHelper.updateStore(data);
 
         res.json({
-            store,
+            updateStore,
             message: 'votre commerce est mis à jour'
         });
     },
@@ -89,12 +83,11 @@ module.exports = {
         //id du store
         const storeId = req.params.storeId;
 
-        //récuperation su store par son id
-        const store = await Store.findByPk(storeId);
+        //vérification avant mise a jour du store
+        const storeHelper = new StoreHelper(null, storeId, null);
 
-        if(!store){
-            throw ({ statusCode: 404, message: 'ce commerce n\'est pas présent en base de données' });
-        }
+        //récuperation su store par son id
+        const store = await storeHelper.getStoreById();
 
         res.json({
             store

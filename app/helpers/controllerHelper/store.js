@@ -1,14 +1,18 @@
-const MainHelper =  require('./mainHelper');
+const StoreSQL =  require('./querySQL/storeSQL');
 const userRole = require ('../userRole');
 
 /**
  * gestion du controller Store
  */
-class StoreHelper extends MainHelper {
-    constructor(userId, storeId, requestUserRoleId){
-        super(userId, storeId, requestUserRoleId);
+class StoreHelper extends StoreSQL {
+    constructor(userId, storeId, requestUserRole){
+        super();
+        this.userId = userId;
+        this.storeId = storeId;
+        this.requestUserRole = requestUserRole;
     }
 
+    //#region Vérification avant action
     /**
      * Vérification avant création d'un commerce
      * @param {Number} cityId - id de la ville
@@ -62,7 +66,61 @@ class StoreHelper extends MainHelper {
 
         return store;
     }
+    //#endregion
 
+    //#region store Helper
+    //#endregion
+
+    //#region store CRUD
+    /**
+     * création d'un commerce
+     * @param {Object} data - données
+     * @property {Text} data.name - nom du commerce
+     * @property {Text} data.presentation - presentation du commerce
+     * @property {Text} data.imageName - nom de l'image
+     * @property {Text} data.street - rue
+     * @property {Text} data.phone - téléphone du commerce
+     * @property {Text} data.email - email du commerce
+     * @property {Number} data.userId - id propritaire
+     * @property {Number} data.cityId - id ville
+     * @property {Number} data.typeId - id type de magasin
+     * @return {Object} - store mise a jour       
+     */
+    async createStore(data){
+        const store = await super.createStore(data);
+    }
+
+    /**
+     * mise a jour d'un commerce
+     * @param {Object} data - données
+     * @property {Text} data.name - nom du commerce
+     * @property {Text} data.presentation - presentation du commerce
+     * @property {Text} data.imageName - nom de l'image
+     * @property {Text} data.street - rue
+     * @property {Text} data.phone - téléphone du commerce
+     * @property {Text} data.email - email du commerce
+     * @property {Number} data.userId - id propritaire
+     * @property {Number} data.cityId - id ville
+     * @property {Number} data.typeId - id type de magasin
+     * @return {Object} - store mise a jour       
+     */
+    async updateStore(store, data){
+        //mise à jour du store
+        const storeUpdate = await this.updateStore(store, data);
+        return storeUpdate;
+    }
+
+    /**
+     * recherche commerce par son id 
+     * @returns {Object} le store
+     */
+    async getStoreById(){
+        const store = await super.getStoreById(this.storeId);
+
+        return store;
+    }
+
+    //#endregion
     #storeType(){
 
     }
