@@ -1,0 +1,59 @@
+@uri = http://localhost:{{ $dotenv PORT }}
+
+#csurf - cookie avec une jwt valide 1 an
+@cookie_csurf = token_data=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InRva2VuIjoiZXlKamIyNTBaVzUwSWpvaWIzUlRTR3RRV0d4aWRHOXpXR1UzV1d0WWVVcFhUSE5IYkhCWVRtOW5WV1JRVFdoUGNtaFJUemhXYUZkV1JHMWlVWHBHU1ZVdlJtd3ljRzRyYUZVdmVYQm9TVVpQUms0M1UzWnlMMkZNY1RoSFdrZzFkVUZwWlV0RGVVeHpLMUpqYlN0MlZYUmFXVm9yTWpOeU5qUkpPVXhDWTBOcllVUk1hMGhXUzNScFQzRWlmUT09In0sImlhdCI6MTY1NjUyMzM2OSwiZXhwIjoxNjg2NzYzMzY5LCJpc3MiOiJtaXN0eWNsaWMiLCJzdWIiOiJjc3VyZl90b2tlbiIsImp0aSI6IjYyOTM3MjQxLWJmNTEtNDUzNC04MmMwLWUwYTBkNDVkZjcyOCJ9.1HbGbg9IPG8tOLrolULu3QNwcM3_4RIPCcCP0PExQeA
+
+#cookie auth professionnel valide 1 an
+@cookie_auth_pro = authorization=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InJvbGVJZCI6M30sImlhdCI6MTY1NjUyMzM2OSwiZXhwIjoxNjg2NzYzMzY5LCJpc3MiOiJtaXN0eWNsaWMiLCJzdWIiOiJhdXRob3JpemF0aW9uIiwianRpIjoiYzcxMWViYTAtODc1Zi00M2UxLWE0MGMtNWEyZjEyMDFiNzFmIn0.u3dUpCVxzCnuGfMGOK56JAsg5C3YgAu99O8fsfcMtyk
+
+#cookie auth utilisateur valide 1 an
+@cookie_auth_user = authorization=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InJvbGVJZCI6MX0sImlhdCI6MTY1NjUyMzM2OSwiZXhwIjoxNjg2NzYzMzY5LCJpc3MiOiJtaXN0eWNsaWMiLCJzdWIiOiJhdXRob3JpemF0aW9uIiwianRpIjoiMjFkZmI1OWQtZjdjOC00NmYxLWFmMTktZDg2ZDgwYzk5MGE1In0.hpm_Txix1BNbIMg9p21Sjzcf-HOfgkUSzXQTSDc1tss
+
+#cookie auth admin valide 1 an
+@cookie_auth_admin = authorization=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InJvbGVJZCI6NH0sImlhdCI6MTY1NjUyMzM2OSwiZXhwIjoxNjg2NzYzMzY5LCJpc3MiOiJtaXN0eWNsaWMiLCJzdWIiOiJhdXRob3JpemF0aW9uIiwianRpIjoiMGM1Njc3Y2YtYjVkNS00YmI3LWJmM2YtMDU2MTIxN2E3ZDU4In0.xACoJIGW798Tya07jOlEF8DAJp0i71TXY2eNaBopkh0
+
+#token associé a ce jwt
+@token = "eyJjb250ZW50Ijoiem1ibC9QUkF6N2hUV0JPTm5kaTQyTmhFdENSZEEzK2RTcE9HUGYrc0dWVHZOQ2hGZ3FpMWVNTTNZc2JRN3NyZSJ9"
+
+@wrong_token = "eyJjb250ZW50Ijoiem1ibC9QUkF6N2hUV0JPTm5kaTQyTmhFdENSZEEzK2RTcE9HUGYrc0dWVHZOQ2hGZ3FpMWVNTTNZc2JRN3NyZSJ8"
+
+### Ajout d'un store
+POST {{uri}}/api/stores/
+Cookie: {{cookie_csurf}}
+Cookie: {{cookie_auth_admin}}
+Content-Type: application/json
+
+{
+    "token": {{token}},
+    "name": "saucisson et mais",
+    "presentation": "ma bonne boucherie",
+    "street": "32 bis chemin des fageolle",
+    "phone": "06 23 27 41 06",
+    "imageName": "mon magasin .jpg",
+    "userId": "3",
+    "email": "bonjour@hotmail.fr",
+    "cityId": "1",
+    "typeId": "2"
+}
+
+### modification d'un store
+PATCH {{uri}}/api/stores/3
+Cookie: {{cookie_csurf}}
+Cookie: {{cookie_auth_admin}}
+Content-Type: application/json
+
+{
+    "token": {{token}},
+    "name": "Toto Fleur H24 - jour et nuit",
+    "presentation": "Manasin de fleur magnifique",
+    "street": "32 bis chemin des fageolle",
+    "phone": "06 23 27 41 06",
+    "imageName": "mon magasin .jpg",
+    "userId": "3",
+    "email": "bonjour@hotmail.fr",
+    "cityId": "1",
+    "typeId": "1"
+}
+
+### récupération d'un store par son id
+GET {{uri}}/api/stores/2

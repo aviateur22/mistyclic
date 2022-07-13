@@ -3,6 +3,12 @@ const { v4: uuidv4 } = require('uuid');
 const jsonWebtoken = require('jsonwebtoken');
 
 class JWT{    
+    /**
+     * 
+     * @param {Object} data 
+     * @property {Text} data.expiresIn - durée de vie du JWT
+     * @property {Text} data.subject - sujet du jwt
+     */
     constructor(data){
         this.expiresIn = data.expiresIn;
         this.subject = data.subject;
@@ -10,7 +16,7 @@ class JWT{
 
     async generateJwt(data) {
         /** données de base pour le token*/
-        const issuer = 'ctoutweb';       
+        const issuer = 'mistyclic';       
 
         //uuid du token
         const jwtid = uuidv4();

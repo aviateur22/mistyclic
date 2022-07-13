@@ -2,7 +2,7 @@
 const bunyan = require('bunyan');
 
 const logger = bunyan.createLogger({
-    name: 'ctoutweb',
+    name: 'mistyclic',
     streams: [
         {
             level: 'error',

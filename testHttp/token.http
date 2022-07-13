@@ -1,0 +1,10 @@
+### gestion des token
+@uri = http://localhost:{{ $dotenv PORT }}
+
+### test d'ajout de post
+GET {{uri}}/api/token/test
+Content-Type: application/json
+
+{
+    
+}

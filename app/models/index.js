@@ -2,12 +2,13 @@ const City = require('./city');
 const Condition = require('./condition');
 const Offer = require('./offer');
 const OfferUser = require('./offerUser');
+const ConditionOffer = require('./conditionOffer');
 const Role = require('./role');
 const Store = require('./store');
 const Type = require('./type');
 const User = require('./user');
 const Zip = require('./zip');
-
+const Refund = require('./refund');
 //Utilisateur - role
 User.belongsTo(Role,{
     foreignKey: 'role_id',
@@ -77,13 +78,13 @@ Zip.hasMany(City,{
 
 //utilisateur - offer
 User.belongsToMany(Offer,{
-    through: 'offer_has_user',
-    as: 'usersHasOffers'
+    through: OfferUser,
+    as: 'offers'
 });
 
 Offer.belongsToMany(User, {
-    through: 'offer_has_user',
-    as: 'offersHasUsers'
+    through: OfferUser,
+    as: 'users'
 });
 
 User.hasMany(Offer,{
@@ -110,25 +111,53 @@ Store.hasMany(Offer, {
 
 //offer - conditions
 Offer.belongsToMany(Condition,{
-    through: 'condition_has_offer',
-    as: 'offersHasConditions'
-
+    through: 'ConditionOffer'
 });
 
 Condition.belongsToMany(Offer,{
-    through: 'condition_has_offer',
-    as: 'conditionsHasOffers'
+    through: 'ConditionOffer'
 });
 
+//offre-ville
+Offer.belongsTo(City,{
+    foreignKey: 'city_id',
+    as: 'offerHasCity'
+});
+
+City.hasMany(Offer,{
+    foreignKey: 'city_id',
+    as: 'cityHasOffers'
+});
+
+//offre - utilisateur - remboursement client
+Offer.belongsToMany(User,{
+    through: {
+        model: Refund,
+        unique: false
+    },
+    as: 'userRefunds'
+});
+
+User.belongsToMany(Offer,{
+    through: {
+        model: Refund,
+        unique: false
+    },
+    as: 'offerRefunds'
+});
+
+//test
 
 module.exports = {
     City,
     Condition,
     Offer,
     OfferUser,
+    ConditionOffer,
     Role,
     Store,
     Type,
     User,
-    Zip
+    Zip,
+    Refund
 };

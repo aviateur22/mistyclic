@@ -1,5 +1,5 @@
 /** ordonne correctement les cookies */
- module.exports = (req,res,next)=>{    
+module.exports = (req,res,next)=>{    
     /**object pour stocker les cookies */
     const list = {};
 
@@ -14,7 +14,7 @@
     }
 
     /**recuperation des cookies */
-    const cookieHeader = req.headers.cookie;  
+    const cookieHeader = req.headers.cookie; 
     
     /**mise des cookies dans l'objet */
     cookieHeader.split(';').forEach(function(cookie) {

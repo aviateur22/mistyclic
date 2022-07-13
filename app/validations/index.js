@@ -1,15 +1,16 @@
 /**
  * Validation de données
  * @param {object} schema - schéma de données a valider
+ * @param {Text} prop - methode de la requete
  * @returns 
  */
- module.exports = (schema)=>async(req, res, next)=>{
+module.exports = (schema, prop)=>async(req, res, next)=>{
     try {
-        if(req.method ==='GET'){
-            await schema.validateAsync(req.query);
-        } else {
-            await schema.validateAsync(req.body);
+        //Validation des données        
+        if(!prop){
+            return console.log('prop manquant pour validation de la donnée');
         }
+        await schema.validateAsync(req[prop]);        
         next();        
     } catch (error) {           
         next({message: error.message, statusCode:'400'});

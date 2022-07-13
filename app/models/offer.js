@@ -5,9 +5,10 @@ class Offer extends Model{
 }
 
 Offer.init({
-    description: DataTypes.STRING,
-    global_amount: DataTypes.INTEGER,
-    individual_amount: DataTypes.INTEGER,
+    name: DataTypes.STRING,
+    presentation: DataTypes.STRING,
+    global_refund: DataTypes.FLOAT,
+    individual_refund: DataTypes.FLOAT,
     is_active: DataTypes.BOOLEAN,
     image_url: DataTypes.STRING,
     user_id:DataTypes.INTEGER,
