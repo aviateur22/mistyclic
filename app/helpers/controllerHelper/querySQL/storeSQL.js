@@ -1,7 +1,8 @@
 const {Store} = require('../../../models');
+const CommonSQL = require('./commonSQL');
 
 
-class StoreSQL {  
+class StoreSQL extends CommonSQL{  
     /**
      * création d'un store
      * @param {Object} data - données du store
@@ -41,7 +42,7 @@ class StoreSQL {
      * @property {Number} data.userId - id propritaire
      * @property {Number} data.cityId - id ville
      * @property {Number} data.typeId - id type de magasin
-     * @return {Object} - store mise a jour     *  
+     * @return {Object} - store mise a jour     
      */
     async updateStore(store, data){
         //mise à jour

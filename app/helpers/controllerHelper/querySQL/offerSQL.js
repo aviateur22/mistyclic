@@ -1,8 +1,9 @@
 const { Op } = require('sequelize');
 const {Offer, Store, User, Type, City, OfferUser, Refund, ConditionOffer, Condition } = require('../../../models');
+const CommonSQL = require('./commonSQL');
 
 
-class StoreSQL {    
+class StoreSQL extends CommonSQL{    
     /**
      * sélection du model pour effectuer des assciations
      * @param {Number} number - le numéro du model
@@ -83,74 +84,7 @@ class StoreSQL {
         }
 
         return offers;
-    }
-
-    /**
-     * recuperation du store
-     * @param {Number} storeId - id du commerce
-     * @returns {Object} store - le store
-     */
-    async getStore(storeId){
-        //recherche du store
-        const store = await Store.findByPk(storeId,{
-            include: ['storeOffers']
-        });
-
-        //store pas trouvé
-        if(!store){
-            throw ({ statusCode: 404, message: 'le commerce n\'existe pas' });
-        }
-
-        return store;
-    }
-
-    /**
-     * Vérification existance de la ville
-     * @param {Number} cityId - id de la ville
-     * @return {Boolean} 
-     */
-    async getCity(cityId){
-        const city = await City.findByPk(cityId);
-
-        //ville inconnue
-        if(!city){
-            throw ({ statusCode: 404, message: 'cette ville n\'existe pas' });
-        }
-        return true;
-    }
-    
-    /**
-     * Récupération d'un utilisateur 
-     * @param {Number} [userId] -  id de l'utilisateur (si pas défini dans le constructeur)
-     * @returns {Object} user - l'utilisateur
-     */    
-    async getUser(userId){        
-        //recherche d'un utilisateur 
-        const user = await User.findByPk(userId);
-
-        //client pas trouvé
-        if(!user){
-            throw ({ statusCode: 404, message: 'ce client n\'existe pas' });
-        }
-
-        return user;
-    }
-
-    /**
-     * Vérification existance du type de magasin
-     * @param {Number} typeId - id du type de commerce
-     * @return {Boolean}
-     */
-    async getStoreType(typeId){
-        const type = await Type.findByPk(typeId);
-
-        //type inconnue
-        if(!type){
-            throw ({ statusCode: 404, message: 'ce type de commerce n\'existe pas' });
-        }
-
-        return true;
-    }
+    }     
 
     /**
      * renvoie le nombre de personne ayant utilisé l'offre
@@ -229,12 +163,12 @@ class StoreSQL {
      * @param {Object} offer - l'offre
      * @param {Object} data - données a mettre a jour
      */
-    async updateOffer(offer, data){
+    async updateOffer(offer, data){        
         //mise a jour des données
         const updateOffer = await offer.update({
             ...data
         });  
-
+       
         //echec création
         if(!updateOffer){
             throw ({ statusCode: 500, message: 'echec d\'modification de l\'offre' });
@@ -274,11 +208,14 @@ class StoreSQL {
      * @returns {Object} - l'enregistrement
      */
     async registerRefund(offer, clientId, storeId){
+        //test
+      
         //ajout du remboursement
         const addRefund = await offer.addUserRefunds(clientId,{
             through: {
                 store_id: storeId
-            }
+            },  
+            duplicating: true                     
         });  
         
         //echec sauvegarde
@@ -312,7 +249,7 @@ class StoreSQL {
      */
     async deleteCondition(offerId){
         //suppression des anciennes conditions
-        ConditionOffer.destroy({
+        await ConditionOffer.destroy({
             where:{
                 offer_id: offerId
             }
@@ -335,11 +272,13 @@ class StoreSQL {
     async addCondition(offer, conditions){
         //Ajout des conditions dans la table de liasion
         for(const condition of conditions){            
-            const addCondition = await offer.addConditions(condition);            
-            if(!addCondition){
-                throw ({ statusCode: 500, message: 'echec d\'enregistrement des conditions de l\'offre' });
+            const addCondition = await offer.addConditions(condition);              
+
+            //echech ajout
+            if(!this.addCondition){
+                throw ({statusCode: 500, message: 'echec sauvegarde des conditions de l\'offre' });
             }
-        }
+        }        
     }
 }
 

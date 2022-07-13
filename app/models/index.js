@@ -131,14 +131,22 @@ City.hasMany(Offer,{
 
 //offre - utilisateur - remboursement client
 Offer.belongsToMany(User,{
-    through: Refund,
+    through: {
+        model: Refund,
+        unique: false
+    },
     as: 'userRefunds'
 });
 
 User.belongsToMany(Offer,{
-    through: Refund,
+    through: {
+        model: Refund,
+        unique: false
+    },
     as: 'offerRefunds'
 });
+
+//test
 
 module.exports = {
     City,

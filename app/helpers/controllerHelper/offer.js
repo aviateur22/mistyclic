@@ -29,7 +29,14 @@ class OfferHelper extends OfferSQL {
      */
     async beforeCreateOffer(conditions){
         //on vérifie l'existance user
-        const user = await super.getUser(this.userId);        
+        const user = await super.getUser(this.userId);
+        
+        //Vérification authorisation modification/création
+        await commonFunction.authorizationUpdateData({
+            resultUser: user.id,
+            userId: this.userId,
+            userActualRole: this.requestUserRole
+        });
 
         //on vérifie que le user est un professionnel
         commonFunction.checkUserRole(user.role_id, userRole.professional);
@@ -41,14 +48,7 @@ class OfferHelper extends OfferSQL {
         commonFunction.storeBelongToProfessional(store, this.userId);
 
         //on vérifie que les conditions de l'offre existent
-        await super.checkOfferCondition(conditions);
-
-        //Vérification authorisation modification/création
-        await commonFunction.authorizationUpdateData({
-            resultUser: user.id,
-            userId: this.userId,
-            userActualRole: this.requestUserRole
-        });
+        await super.checkOfferCondition(conditions);       
 
         return true;
     }
@@ -62,6 +62,13 @@ class OfferHelper extends OfferSQL {
     async beforeUpdateOffer(offerId, conditions){
         //on vérifie le user
         const user = await super.getUser(this.userId);
+
+        //Vérification authorisation modification/création
+        commonFunction.authorizationUpdateData({
+            resultUser: user.id,
+            userId: this.userId,
+            userActualRole: this.requestUserRole,            
+        });
 
         //on vérifie que le user est un professionnel
         commonFunction.checkUserRole(user.role_id, userRole.professional);
@@ -79,14 +86,7 @@ class OfferHelper extends OfferSQL {
         await commonFunction.offerBelongToStore(store, offerId);
 
         //on vérifie que l'offre est rattaché au professionnel
-        commonFunction.offerBelongToProfessional(offer, this.userId);
-
-        //Vérification authorisation modification/création
-        commonFunction.authorizationUpdateData({
-            resultUser: user.id,
-            userId: this.userId,
-            userActualRole: this.requestUserRole,            
-        });
+        commonFunction.offerBelongToProfessional(offer, this.userId);        
 
         return offer;
     }
@@ -99,6 +99,13 @@ class OfferHelper extends OfferSQL {
     async beforeDestroyOffer(offerId){
         //on vérifie le user
         const user = await super.getUser(this.userId);
+
+        //Vérification authorisation modification/création
+        commonFunction.authorizationUpdateData({
+            resultUser: user.id,
+            userId: this.userId,
+            userActualRole: this.requestUserRole
+        });
 
         //on vérifie que le user est un pro
         commonFunction.checkUserRole(user.role_id, userRole.professional);
@@ -113,7 +120,19 @@ class OfferHelper extends OfferSQL {
         await commonFunction.offerBelongToStore(store, offerId);        
 
         //on verifie que l'offre est rattaché au professionelle
-        commonFunction.offerBelongToProfessional(offer, this.userId);        
+        commonFunction.offerBelongToProfessional(offer, this.userId);                
+
+        return offer;
+    }      
+
+    /**
+     * vérification du professionnel avant récupération des offres
+     * @param {Number} requestUserRole - role nécessaire pour faire cette requête
+     * @returns {boolean}
+     */
+    async beforeProfessionalGetOffers(requestUserRole){
+        //récupération données utilisateurs
+        const user = await super.getUser(this.userId);
 
         //Vérification authorisation modification/création
         commonFunction.authorizationUpdateData({
@@ -122,24 +141,11 @@ class OfferHelper extends OfferSQL {
             userActualRole: this.requestUserRole
         });
 
-        return offer;
-    }      
-
-    /**
-     * vérification si professionnel avant récupération des offres
-     * @param {Number} requestUserRole - role id nécessaire pour faire cette requête
-     * @returns {boolean}
-     */
-    async beforeProfessionalGetOffers(requestUserRole){
-        //récupération données utilisateurs
-        const user = await super.getUser(this.userId);
-
         //vérification des privilèges
         commonFunction.checkUserRole(user.role_id, requestUserRole);       
 
         //vérification appartenance commerce et user
-        if(this.storeId){
-            console.log(this.storeId);
+        if(this.storeId){            
             //on vérifie que le commerce existe
             const store = await super.getStore(this.storeId);
 
@@ -147,13 +153,6 @@ class OfferHelper extends OfferSQL {
             commonFunction.storeBelongToProfessional(store, this.userId);    
         }
 
-        //Vérification authorisation modification/création
-        commonFunction.authorizationUpdateData({
-            resultUser: user.id,
-            userId: this.userId,
-            userActualRole: this.requestUserRole
-        });
-        
         return true;
     }
 
@@ -191,8 +190,13 @@ class OfferHelper extends OfferSQL {
         //on vérifie le user
         const user = await super.getUser(this.userId);
 
-        //on vérifie que le user à les privilége d'un collaborateur du commerce
-        commonFunction.checkUserRole(user.role_id, userRole.professional);
+        //Vérification authorisation modification/création
+        commonFunction.authorizationUpdateData({
+            resultUser: user.id,
+            userId: this.userId,
+            userActualRole: this.requestUserRole,
+            levelRoleRequest: userRole.collaborator
+        });
 
         //on vérifie que le commerce existe
         const store = await super.getStore(this.storeId);
@@ -209,16 +213,8 @@ class OfferHelper extends OfferSQL {
         //on verifie que l'offre est rattaché au professionelle
         commonFunction.offerBelongToProfessional(offer, this.userId);
 
-        //suppression des subscriptions expired
-        await this.#removeSubscriptionOffer(offerId);
-
-        //Vérification authorisation modification/création
-        commonFunction.authorizationUpdateData({
-            resultUser: user.id,
-            userId: this.userId,
-            userActualRole: this.requestUserRole,
-            levelRoleRequest: userRole.collaborator
-        });
+        //suppression des subscriptions expired (au dela de XX minutes)
+        await this.#removeSubscriptionOffer(offerId);      
 
         return offer;
     }    
@@ -230,7 +226,7 @@ class OfferHelper extends OfferSQL {
      */
     async beforeRefund(refundCode){
         //vérifie que le code de remboursement existe
-        const subscription = await super.getSubscriptionByRefundCode(refundCode);
+        const subscription = await super.getSubscriptionByRefundCode(refundCode);        
 
         //on vérifie que mle store existe
         const store = await super.getStore(this.storeId);
@@ -247,15 +243,6 @@ class OfferHelper extends OfferSQL {
         //verifie que l'offre est rattache au professionel
         commonFunction.storeBelongToProfessional(store, offer.user_id);
 
-        //récupérer id du client à partir du code promo
-        const clientId = subscription.user_id;
-
-        //vérifier que le client existe
-        const client = await super.getUser(clientId);
-
-        //on vérifie le montant d'argent pour l'offre   
-        const refundPossible = await this.checkOfferMoney(offer);    
-
         //Vérification authorisation modification/création
         commonFunction.authorizationUpdateData({
             resultUser: offer.user_id,
@@ -263,6 +250,15 @@ class OfferHelper extends OfferSQL {
             userActualRole: this.requestUserRole,
             levelRoleRequest: userRole.collaborator
         });
+
+        //récupérer id du client à partir du code promo
+        const clientId = subscription.user_id;
+
+        //vérifier que le client existe
+        const client = await super.getUser(clientId);
+
+        //on vérifie le montant d'argent pour l'offre   
+        const refundPossible = await this.checkOfferMoney(offer);           
 
         if(!refundPossible){
             throw ({ statusCode:400, message:'le montant disponible ne permets pas de faire un remboursement'});

@@ -67,8 +67,9 @@ module.exports = {
 
         //mise a jour des données
         const data = {...store, ...{name, presentation, image_url: imageName, street, phone, email, city_id: cityId, type_id: typeId}};
-
-        const updateStore = await storeHelper.updateStore(data);
+       
+        //mise a jour du store
+        const updateStore = await storeHelper.updateStore(store, data);
 
         res.json({
             updateStore,

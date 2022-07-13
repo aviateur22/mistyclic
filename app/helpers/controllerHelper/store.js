@@ -1,4 +1,5 @@
 const StoreSQL =  require('./querySQL/storeSQL');
+const commonFunction = require('./commonFunction');
 const userRole = require ('../userRole');
 
 /**
@@ -21,10 +22,10 @@ class StoreHelper extends StoreSQL {
      */
     async beforeCreateStore(cityId, typeId){
         //on vérifie l'existance user
-        const user = await super.getUser();
+        const user = await super.getUser(this.userId);
 
         //on vérifie que le user est un professionnel
-        super.checkUserRole(user.role_id, userRole.professional);
+        commonFunction.checkUserRole(user.role_id, userRole.professional);
 
         //vérification existance de la ville
         await super.getCity(cityId);
@@ -33,7 +34,11 @@ class StoreHelper extends StoreSQL {
         await super.getStoreType(typeId);
 
         //Vérification authorisation modification/création
-        super.authorizationUpdateData(user.id);
+        commonFunction.authorizationUpdateData({
+            resultUser: user.id,
+            userId: this.userId,
+            userActualRole: this.requestUserRole
+        });
 
         return true;
     }
@@ -44,10 +49,10 @@ class StoreHelper extends StoreSQL {
      */
     async beforeUpdateStore(cityId, typeId){
         //on vérifie le user
-        const user = await super.getUser();
+        const user = await super.getUser(this.userId);
 
         //on vérifie que le user est un professionnel
-        super.checkUserRole(user.role_id, userRole.professional);
+        commonFunction.checkUserRole(user.role_id, userRole.professional);
 
         //vérification existance de la ville
         await super.getCity(cityId);
@@ -56,13 +61,17 @@ class StoreHelper extends StoreSQL {
         await super.getStoreType(typeId);
 
         //on vérifie que le commerce existe
-        const store = await super.getStore();
+        const store = await super.getStore(this.storeId);
 
         //on vérifie que le professionnel est rattaché au commerce
-        super.storeBelongToProfessional(store);
+        commonFunction.storeBelongToProfessional(store,user.id);
       
         //Vérification authorisation modification/création
-        super.authorizationUpdateData(user.id);
+        commonFunction.authorizationUpdateData({
+            resultUser: user.id,
+            userId: this.userId,
+            userActualRole: this.requestUserRole
+        });
 
         return store;
     }
@@ -106,7 +115,7 @@ class StoreHelper extends StoreSQL {
      */
     async updateStore(store, data){
         //mise à jour du store
-        const storeUpdate = await this.updateStore(store, data);
+        const storeUpdate = await super.updateStore(store, data);
         return storeUpdate;
     }
 
@@ -119,11 +128,7 @@ class StoreHelper extends StoreSQL {
 
         return store;
     }
-
-    //#endregion
-    #storeType(){
-
-    }
+    //#endregion   
 }
 
 module.exports = StoreHelper;

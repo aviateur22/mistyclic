@@ -1,12 +1,15 @@
 const sequelize = require('../database/client');
-const {DataTypes, Model} = require('sequelize');
+const {DataTypes, Model, Sequelize} = require('sequelize');
 
 class Refund extends Model{
 }
 
-Refund.init({
-    user_id: DataTypes.INTEGER,
-    offer_id: DataTypes.INTEGER,
+Refund.init({    
+    id: {
+        type: Sequelize.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
+    },
     store_id: DataTypes.INTEGER
 },{
     sequelize,

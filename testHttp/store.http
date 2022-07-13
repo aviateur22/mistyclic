@@ -17,7 +17,7 @@
 
 @wrong_token = "eyJjb250ZW50Ijoiem1ibC9QUkF6N2hUV0JPTm5kaTQyTmhFdENSZEEzK2RTcE9HUGYrc0dWVHZOQ2hGZ3FpMWVNTTNZc2JRN3NyZSJ8"
 
-### Ajout d'une offre
+### Ajout d'un store
 POST {{uri}}/api/stores/
 Cookie: {{cookie_csurf}}
 Cookie: {{cookie_auth_admin}}
@@ -36,8 +36,8 @@ Content-Type: application/json
     "typeId": "2"
 }
 
-### modification d'un offre
-PATCH {{uri}}/api/stores/2
+### modification d'un store
+PATCH {{uri}}/api/stores/3
 Cookie: {{cookie_csurf}}
 Cookie: {{cookie_auth_admin}}
 Content-Type: application/json
@@ -54,3 +54,6 @@ Content-Type: application/json
     "cityId": "1",
     "typeId": "1"
 }
+
+### récupération d'un store par son id
+GET {{uri}}/api/stores/2

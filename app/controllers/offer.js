@@ -139,8 +139,9 @@ module.exports = {
 
     /**
      * récupération des offres d'un commerce
+     * @param {boolean} inactiveOffer - affichage des offres qui sont aussi inactive (pour un professionnel)
      */
-    getOffersByStore:(allOffer)=>async(req, res, next)=>{  
+    getOffersByStore:(inactiveOffer)=>async(req, res, next)=>{  
         //roleId de la personne que effectue la requete
         const requestRoleId = req.payload.data.roleId;
 
@@ -153,7 +154,7 @@ module.exports = {
         let offerHelper;
 
         //Seule les professionnels peuvent avoir accès aux offres inactives
-        if(allOffer){
+        if(inactiveOffer){
             //id du professionel
             const userId = req.params.userId;  
             

@@ -44,12 +44,12 @@ Content-Type: application/json
 
 {
     "token": {{token}},    
-    "name": "mes fleurs à vendres pour pas chers",
+    "name": "oups",
     "presentation": "pour l'achat de 2 roses, vous bénificié d'un remboursement immédiat de 0.50€",    
     "imageName": "fleur.jpg",
     "userId": "4",
     "storeId": "2",
-    "conditions": [2]
+    "conditions": [2,1,3]
 }
 
 ### récupération d'une offre
@@ -89,12 +89,12 @@ Content-Type: application/json
 }
 
 ### client souscri à une offre - génration d'un token
-GET  {{uri}}/api/offers/generate-token-by-offer/token/{{token}}/user/4/store/2/offer/2
+GET  {{uri}}/api/offers/generate-token-by-offer/token/{{token}}/user/1/store/2/offer/4
 Cookie: {{cookie_csurf}}
 Cookie: {{cookie_auth_pro}}
 
 ### validation d'un rembourssement
-POST {{uri}}/api/offers/refund/nshbv
+POST {{uri}}/api/offers/refund/jsuwx
 Cookie: {{cookie_csurf}}
 Cookie: {{cookie_auth_pro}}
 Content-Type: application/json

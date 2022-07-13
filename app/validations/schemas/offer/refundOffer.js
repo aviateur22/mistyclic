@@ -14,17 +14,13 @@ module.exports = Joi.object({
             'any.required': 'l\'identifiant du commerce est obligatoire',
             'string.empty': 'l\'identifiant du commerce est obligatoire'            
         }),
-    
-    // token
-    tokenOffer: Joi
+
+    /** csurf token */
+    token: Joi
         .string()
-        .max(5)
-        .min(5)        
         .required()
         .messages({
-            'string.empty': 'le token de l\'offre est obligatoire',
-            'any.required':  'le token de l\'offre est obligatoire',
-            'string.max': 'Le format du token n\'est pas correcte',
-            'string.min': 'Le format du token n\'est pas correcte',
+            'string.empty': 'token',
+            'any.required': 'token'  
         }),
 });
