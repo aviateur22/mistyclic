@@ -1,15 +1,16 @@
+const offer = require('../../controllers/offer');
 const userRole = require('../userRole');
 
 module.exports = {
     /**
      * vérification si store appartient au professionnel
-     * @param {Number} userId - id utilisateur
+     * @param {Number} professionalId - id du professionnel à qui appartient le commerce
      * @param {Object} store - le store concerné     * 
      * @returns 
      */
-    storeBelongToProfessional: (store, userId)=>{
+    storeBelongToProfessional: (professionalId, userId)=>{
         //Verification id utilisateur et id utilsateru en base de donnée
-        if(Number(userId) !== Number(store.user_id)){
+        if(Number(userId) !== Number(professionalId)){
             throw ({ statusCode: 403, message: 'vous n\'êtes pas rattaché au commerce désigné' });
         }
         return true;
@@ -21,9 +22,9 @@ module.exports = {
      * @param {Object} offer - offre concernée
      * @returns {boolean}
      */
-    offerBelongToProfessional: (offer, userId)=>{   
-        //Verification de l'id utilisateur et id utilisateur en base de donnée
-        if(Number(userId) !== Number(offer.user_id)){
+    offerBelongToProfessional: (offerProfessionalId, userId)=>{   
+        //Verification de l'id utilisateur et id utilisateur en base de donnée       
+        if(Number(userId) !== Number(offerProfessionalId)){
             throw ({ statusCode: 403, message: 'vous n\'êtes pas rattaché à l\'offre désignée' });
         }
         return true; 
@@ -32,19 +33,21 @@ module.exports = {
 
     /**
      * vérification que l'offre appartient au commerce
-     * @param {Object} store - le store 
+     * @param {Array} offers - liste des offres appartenant au store 
      * @param {Number} offerId - id de l'offre recherché
      * @returns {boolean}
      */
-    offerBelongToStore: async(store, offerId)=>{
+    offerBelongToStore: async(offers, offerId)=>{   
         //véroification de la liste des offres du commerce
-        const offerBelongToStore =await store?.storeOffers.some(offer => Number(offerId) === Number(offer.id));
-        if(!offerBelongToStore)
-        {
-            throw ({ statusCode: 400, message: 'l\'offre à modifiée n\'est pas rattachée au commerce désigné' }); 
-        }
+        const findOffer = offers.filter(offer => Number(offerId) === Number(offer.id));
 
-        return true;
+        //si pas de données
+        if(!findOffer.length > 0)
+        {
+            throw ({ statusCode: 400, message: 'l\'offre à modifiée n\'existe pas ou n\'est pas rattachée au commerce désigné' }); 
+        }       
+        
+        return findOffer[0];
     },
 
     /**
@@ -53,7 +56,7 @@ module.exports = {
      * @param {Number} requestUserRoleId - id du role a avoir
      * @returns {boolean} [true|false]
      */
-    checkUserRole: (userRoleId, requestUserRoleId)=>{       
+    checkUserRole: (userRoleId, requestUserRoleId)=>{ 
         if(Number(userRoleId) < Number(requestUserRoleId)){
             throw ({ statusCode: 403, message: 'vous n\'avez pas les priviléges nécessaire pour cette action' });
         }

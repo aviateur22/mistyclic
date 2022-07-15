@@ -25,7 +25,7 @@ Content-Type: application/json
 
 {
     "token": {{token}},    
-    "name": "mes fleurs à vendres pour pas chers",
+    "name": "modifi",
     "presentation": "pour l'achat de 2 roses, vous bénificié d'un remboursement immédiat de 0.50€",
     "globalRefund": "499",
     "individualRefund": "0.50",
@@ -44,35 +44,38 @@ Content-Type: application/json
 
 {
     "token": {{token}},    
-    "name": "oups",
+    "name": "gfdg",
     "presentation": "pour l'achat de 2 roses, vous bénificié d'un remboursement immédiat de 0.50€",    
-    "imageName": "fleur.jpg",
+    "imageName": "test.jpg",
     "userId": "4",
     "storeId": "2",
-    "conditions": [2,1,3]
+    "conditions": [2,1,6]
 }
 
 ### récupération d'une offre
-GET {{uri}}/api/offers/5
+GET {{uri}}/api/offers/1
 
 ### récupération de toutes les offres
 GET {{uri}}/api/offers
 
 ### récupération des offres par ville
-GET {{uri}}/api/offers/by-city/2
+GET {{uri}}/api/offers/by-city/10
 
-### récupération de toutes les offres par userId
+### récupération des offres par store
+GET {{uri}}/api/offers/by-store/5
+
+### récupération de toutes les offres par un professionel
 GET {{uri}}/api/offers/token/{{token}}/professional/4
 Cookie: {{cookie_csurf}}
-Cookie: {{cookie_auth_pro}}
+Cookie: {{cookie_auth_admin}}
 
 ### récupération offres d'un commerce par un professionnel Id
-GET {{uri}}/api/offers/token/{{token}}/professional/4/store/2
+GET {{uri}}/api/offers/token/{{token}}/professional/2/store/1
 Cookie: {{cookie_csurf}}
 Cookie: {{cookie_auth_pro}}
 
-### récupération des tokens par id de l'offre
-GET {{uri}}/api/offers/get-tokens-by-offer/token/{{token}}/professional/3/store/2/offer/2
+### récupération des codes de remboursement par offerId
+GET {{uri}}/api/offers/get-tokens-by-offer/token/{{token}}/professional/4/store/2/offer/1
 Cookie: {{cookie_csurf}}
 Cookie: {{cookie_auth_admin}}
 
@@ -89,12 +92,12 @@ Content-Type: application/json
 }
 
 ### client souscri à une offre - génration d'un token
-GET  {{uri}}/api/offers/generate-token-by-offer/token/{{token}}/user/1/store/2/offer/4
+GET  {{uri}}/api/offers/generate-token-by-offer/token/{{token}}/user/1/store/2/offer/3
 Cookie: {{cookie_csurf}}
 Cookie: {{cookie_auth_pro}}
 
 ### validation d'un rembourssement
-POST {{uri}}/api/offers/refund/jsuwx
+POST {{uri}}/api/offers/refund/hciti
 Cookie: {{cookie_csurf}}
 Cookie: {{cookie_auth_pro}}
 Content-Type: application/json

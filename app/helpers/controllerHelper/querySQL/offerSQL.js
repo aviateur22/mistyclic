@@ -1,6 +1,6 @@
-const { Op } = require('sequelize');
-const {Offer, Store, User, Type, City, OfferUser, Refund, ConditionOffer, Condition } = require('../../../models');
+//const {Offer, Store, User, Type, City, OfferUser, Refund, ConditionOffer, Condition } = require('../../../models');
 const CommonSQL = require('./commonSQL');
+const client = require('../../../database/pg');
 
 
 class StoreSQL extends CommonSQL{    
@@ -12,35 +12,57 @@ class StoreSQL extends CommonSQL{
     getModels(number){
         switch (number){
         case 1:
-            return { model: User, as: 'users' };
+            return { model: 'offer_has_user' };
         default: return null;
         }
     }
 
     /**
-     * vérifie existance d'une offre
+     * offre par id
      * @param {Number} offerId - id de l'offre
      * @param {Object} includeModel - model a recuperer
-     * @param {Boolean} inactiveOffer - affichage des offre inactive
+     * @param {Number} storeId - id du store
      * @returns {Object} offer - renvoie l'offre
      */
-    async getOffer(offerId, model){
+    async getOffer(offerId, model, storeId){        
         //recherche de l'offre       
-        let offer;        
-        if(model){
-            offer = await Offer.findByPk(offerId, {
-                include: model
-            });
-        } else {
-            offer = await Offer.findByPk(offerId);
-        }
-       
-        //offre pas trouvé
-        if(!offer){
-            throw ({ statusCode: 404, message: 'l\'offre recherchée n\'existe pas' });
-        }
+        let offer;  
 
-        return offer;
+        //Jointure avec un model
+        if(model){              
+            offer = await client.query(`
+            SELECT offer.id,
+            offer.account_id AS offer_pro_id,
+            offer.store_id AS offer_store_id,
+            offer_has_user.id AS offerUser_id,
+            offer_has_user.account_id AS offerUser_id,
+            offer_has_user.refund_code AS offerUser_refund_code,
+            account.email AS user_email
+            FROM offer
+            INNER JOIN offer_has_user ON offer.id = offer_has_user.offer_id
+            INNER JOIN account ON offer_has_user.account_id = account.id
+            WHERE offer.id = $1 AND offer.store_id = $2
+            `,
+            [offerId, storeId]
+            );
+
+            //offre pas trouvé
+            if(offer.rowCount === 0 ){
+                throw ({ statusCode: 404, message: 'l\'offre recherchée n\'existe pas' });
+            }
+            
+            return offer.rows;
+        } else {        
+            offer = await client.query('SELECT * FROM "offer" WHERE offer.id = $1',                
+                [offerId]
+            );
+
+            //offre pas trouvé
+            if(offer.rowCount === 0 ){
+                throw ({ statusCode: 404, message: 'l\'offre recherchée n\'existe pas' });
+            }
+            return offer.rows[0];
+        }       
     }
 
     /**
@@ -48,58 +70,64 @@ class StoreSQL extends CommonSQL{
      * @param {Text} refundCode - code de remboursement
      * @returns {Object} - refund
      */
-    async getSubscriptionByRefundCode(refundCode){
+    async getSubscriptionByRefundCode(refundCode){        
         //recherche du code promo 
-        const findRefundCode = await OfferUser.findOne({
-            where: {
-                refund_code: refundCode,                
-            }
-        });
+        const findRefundCode = await client.query('SELECT * FROM "offer_has_user" WHERE refund_code = $1',
+            [refundCode]
+        );
 
         //code refund pas trouvé
-        if(!findRefundCode){
+        if(!findRefundCode.rowCount === 0){
             throw ({ statusCode: 404, message: 'ce code de remboursement n\'existe pas'});
         }
 
-        return findRefundCode;
+        return findRefundCode.rows[0];
     }
 
     /**
      * renvoie une liste d'offre en fonction de certains parametres
-     * @param {Array} param - tableau d'objet contenant les parametres de filtre
+     * @param {Array} filters - tableau d'objet contenant les parametres de filtre
      * @return {Array} liste des offres
      */
-    async getOffers(param){
-        let offers;        
+    async getOffers(filters){ 
+        //offres a récupérer
+        let offers; 
 
-        //si pas de parametres
-        if(!param){
-            offers = await Offer.findAll();
-        } else {
-            offers = await Offer.findAll({
-                where: {
-                    [Op.and]: [...param]
-                }
+        //filtres disponibles
+        if(filters){
+            //paramètre sup requête
+            let queryParam = '';    
+            
+            //mise en forme des paramètre de filtre
+            filters.forEach(param => {                           
+                if(!queryParam){
+                    queryParam = `${Object.keys(param)} = ${Object.values(param)}`;
+                } else {
+                    queryParam += ` AND ${Object.keys(param)} = ${Object.values(param)}` ; 
+                }                   
             });
+            //requète sql avec filtre
+            offers = await client.query(`SELECT * FROM "offer" WHERE ${queryParam}`);
+        } else {
+            //requète sql sans filtre
+            offers = await client.query('SELECT * FROM "offer"');
         }
 
-        return offers;
+        return offers.rows;
     }     
 
     /**
-     * renvoie le nombre de personne ayant utilisé l'offre
+     * renvoie le nombre de personne ayant utilisé une offre
      * @param {Number} offerId - id de l'offre
      * @return {Number} nombre de personne
      */
     async getOfferUsed(offerId){
         //compte le nombre d'utilisateur
-        const offerUsed = await Refund.count({
-            where:{
-                offer_id: offerId
-            }
-        }); 
+        const offerUsed = await client.query('SELECT * FROM "refund" WHERE offer_id = $1', 
+            [offerId]
+        );
 
-        return offerUsed;
+        return offerUsed.rowCount;
     }
 
     /**
@@ -109,28 +137,25 @@ class StoreSQL extends CommonSQL{
      */
     async getSubscriptionByOfferId(offerId){
         //recherche de toutes les subscription reliées a offerId
-        const subscriptions = await OfferUser.findAll({
-            where: {
-                offer_id: offerId
-            }
-        });
-
-        return subscriptions;
+        const subscriptions = await client.query('SELECT * FROM "offer_has_user" WHERE offer_id = $1',
+            [offerId]
+        );
+        return subscriptions.rows;
     }
 
     /**
      * vérification existance souscription d'offre
      */
     async getSubscriptionById(subscriptionId){
-        //recherche de la souscription
-        const subscription = await OfferUser.findByPk(subscriptionId);
+        const subscription = await client.query('SELECT * FROM "offer_has_user" WHERE id = $1',
+            [subscriptionId]
+        );       
 
         //si pas trouvé
-        if(!subscription){
+        if(subscription.rowCount === 0){
             throw ({ statusCode: 404, message: 'cette souscription n\'existe plus' });
-        }
-        
-        return subscription;
+        }        
+        return subscription.rows[0];
     }
 
     /**
@@ -139,23 +164,16 @@ class StoreSQL extends CommonSQL{
      */
     async createOffer(data){
         //création de l'offre
-        const offer = await Offer.create({
-            name: data.name,
-            presentation: data.presentation,
-            global_refund: data.globalRefund,
-            individual_refund: data.individualRefund,
-            image_url: data.imageName,
-            store_id: data.storeId,
-            user_id: data.userId,
-            city_id: data.cityId
-        });   
+        const offer = await client.query('INSERT INTO "offer" ("name", "presentation", "global_refund", "individual_refund", "image_url", "store_id", "account_id", "city_id") VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *',
+            [data.name, data.presentation, data.globalRefund, data.individualRefund, data.imageName, data.storeId, data.userId, data.cityId]
+        );       
         
         //echec création
-        if(!offer){
+        if(!offer.rowCount === 0){
             throw ({ statusCode: 500, message: 'echec d\'enregistrement de votre offre' });
         }
 
-        return offer;
+        return offer.rows[0];
     }
 
     /**
@@ -163,18 +181,32 @@ class StoreSQL extends CommonSQL{
      * @param {Object} offer - l'offre
      * @param {Object} data - données a mettre a jour
      */
-    async updateOffer(offer, data){        
+    async updateOffer(offer, data){         
+        data.updated_at = new Date().toISOString().slice(0, 19).replace('T', ' ');
         //mise a jour des données
-        const updateOffer = await offer.update({
-            ...data
-        });  
+        const updateOffer = await client.query(`
+        UPDATE offer SET
+        name = $1,
+        presentation = $2,
+        global_refund = $3,
+        individual_refund = $4,
+        image_url = $5,
+        store_id = $6,
+        account_id = $7,
+        city_id = $8,
+        updated_at = $9
+        WHERE id = $10
+        RETURNING *`
+        , 
+        [data.name, data.presentation, data.global_refund, data.individual_refund, data.image_url, data.store_id, data.account_id, data.city_id, data.updated_at, offer.id]
+        );   
        
         //echec création
-        if(!updateOffer){
+        if(!updateOffer.rowCount === 0){
             throw ({ statusCode: 500, message: 'echec d\'modification de l\'offre' });
         }
 
-        return updateOffer;
+        return updateOffer.rows[0];
     }
 
     /**
@@ -186,18 +218,15 @@ class StoreSQL extends CommonSQL{
      */
     async clientSubscribeToOffer(offer, user, refundCode){
         //ajout du token + id utilisateur en base de données
-        const addRefundCode = await offer.addUsers(user, {
-            through:{
-                refund_code: refundCode
-            }
-        });
+        const addRefundCode = await client.query('INSERT INTO "offer_has_user" ("account_id", "offer_id","refund_code") VALUES ($1, $2, $3) RETURNING *',
+            [user.id, offer.id, refundCode]);
 
         //echec sauvergade du code de remboursement
-        if(!addRefundCode){
+        if(addRefundCode.rowCount === 0){
             throw ({statusCode: 500, message: 'echec sauvegarde code de remboursement' });
         }
 
-        return addRefundCode;
+        return addRefundCode.rows[0];
     }
 
     /**
@@ -208,22 +237,17 @@ class StoreSQL extends CommonSQL{
      * @returns {Object} - l'enregistrement
      */
     async registerRefund(offer, clientId, storeId){
-        //test
-      
-        //ajout du remboursement
-        const addRefund = await offer.addUserRefunds(clientId,{
-            through: {
-                store_id: storeId
-            },  
-            duplicating: true                     
-        });  
+        //test sql query
+        const addRefund = await client.query('INSERT INTO "refund" ("account_id", "offer_id","store_id") VALUES ($1,$2,$3) RETURNING *', 
+            [clientId, offer.id, storeId]
+        );
         
         //echec sauvegarde
-        if(!addRefund){
+        if(addRefund.rowCount === 0){
             throw ({statusCode: 500, message: 'echec sauvegarde remboursement' });
         }
 
-        return addRefund;
+        return addRefund.rows[0];
     }    
 
     /**
@@ -236,8 +260,11 @@ class StoreSQL extends CommonSQL{
         }
         //Vérification si les conditions de l'offre existe 
         for(let condition of conditions){  
-            const findCondition = await Condition.findByPk(condition);
-            if(!findCondition){
+            const findCondition = await client.query('SELECT * FROM "condition" WHERE id = $1',
+                [condition]
+            );
+
+            if(findCondition.rowCount === 0){
                 throw ({ statusCode: 404, message: 'la conditon renseignée n\'existe pas' });
             }        
         }
@@ -247,13 +274,11 @@ class StoreSQL extends CommonSQL{
      * suppression des conditions
      * @param {Number} offerId - id de l'offre
      */
-    async deleteCondition(offerId){
+    async deleteCondition(offerId){        
         //suppression des anciennes conditions
-        await ConditionOffer.destroy({
-            where:{
-                offer_id: offerId
-            }
-        });
+        await client.query('DELETE FROM "condition_has_offer" WHERE id = $1',
+            [offerId]
+        );
     }
 
     /**
@@ -261,7 +286,8 @@ class StoreSQL extends CommonSQL{
      * @param {Object} subscription - souscription offre a supprimée
      */
     async deleteOfferSubscription(subscription){
-        await subscription.destroy();
+        await client.query('DELETE FROM "offer_has_user" WHERE id = $1',
+            [subscription.id]);
     }
 
     /**
@@ -269,13 +295,15 @@ class StoreSQL extends CommonSQL{
      * @param {Object} offer - offre concerné par les conditions
      * @param {Array} conditions - consition a ajouter à l'offre
      */
-    async addCondition(offer, conditions){
+    async addCondition(offer, conditions){        
         //Ajout des conditions dans la table de liasion
         for(const condition of conditions){            
-            const addCondition = await offer.addConditions(condition);              
+            const addCondition =await client.query('INSERT INTO "condition_has_offer" ("condition_id", "offer_id") VALUES ($1, $2)',
+                [condition, offer.id]
+            );
 
             //echech ajout
-            if(!this.addCondition){
+            if(addCondition.rowCount === 0){
                 throw ({statusCode: 500, message: 'echec sauvegarde des conditions de l\'offre' });
             }
         }        

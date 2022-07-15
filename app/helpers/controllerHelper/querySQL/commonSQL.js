@@ -1,4 +1,4 @@
-const {User, Type, City, Store} = require('../../../models');
+const client = require('../../../database/pg');
 
 /**
  * Function SQL commune au different SQLHelper
@@ -11,14 +11,15 @@ class CommonSQL {
      */    
     async getUser(userId){        
         //recherche d'un utilisateur 
-        const user = await User.findByPk(userId);
+        const user = await client.query('SELECT * FROM "account" WHERE id = $1',
+            [userId]);        
 
         //client pas trouvé
-        if(!user){
+        if(user.rowCount === 0){
             throw ({ statusCode: 404, message: 'ce client n\'existe pas' });
         }
 
-        return user;
+        return user.rows[0];
     }
 
     /**
@@ -27,10 +28,11 @@ class CommonSQL {
      * @return {Boolean} 
      */
     async getCity(cityId){
-        const city = await City.findByPk(cityId);
+        const city = await client.query('SELECT * FROM "city" WHERE id = $1',
+            [cityId]);        
 
         //ville inconnue
-        if(!city){
+        if(city.rowCount === 0){
             throw ({ statusCode: 404, message: 'cette ville n\'existe pas' });
         }
         return true;
@@ -42,10 +44,11 @@ class CommonSQL {
      * @return {Boolean}
      */
     async getStoreType(typeId){
-        const type = await Type.findByPk(typeId);
+        const type = await client.query('SELECT * FROM "type" WHERE id = $1',
+            [typeId]);
 
         //type inconnue
-        if(!type){
+        if(type.rowCount === 0){
             throw ({ statusCode: 404, message: 'ce type de commerce n\'existe pas' });
         }
 
@@ -59,16 +62,26 @@ class CommonSQL {
      */
     async getStore(storeId){
         //recherche du store
-        const store = await Store.findByPk(storeId,{
-            include: ['storeOffers']
-        });
-
+        const store = await client.query(`
+        SELECT * FROM "store" WHERE id = $1
+        `,
+        [storeId]);
+        
         //store pas trouvé
-        if(!store){
+        if(store.rowCount === 0){
             throw ({ statusCode: 404, message: 'le commerce n\'existe pas' });
         }
 
-        return store;
+        //recherche des offres associées
+        const offers = await client.query(`
+        SELECT * FROM "offer" WHERE store_id = $1
+        `,
+        [storeId]);
+        
+        return {
+            store: store.rows[0],
+            offers: offers.rows
+        };
     }  
 }
 module.exports = CommonSQL;

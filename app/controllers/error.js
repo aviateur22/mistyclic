@@ -13,6 +13,7 @@ module.exports = (err, req, res, next)=>{
         /**Verification si erreur managée */
         if(!err.message || !err.statusCode || Number(err.statusCode) === 500){
             logger.error(err);
+            console.log(err)
 
             return res.status(500).json({
                 errorMessage: 'erreur interne au serveur'
