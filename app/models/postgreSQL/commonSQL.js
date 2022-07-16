@@ -1,7 +1,7 @@
-const client = require('../../../database/pg');
+const client = require('../../database/pg');
 
 /**
- * Function SQL commune au different SQLHelper
+ * Function SQL commune aux fichiers SQL
  */
 class CommonSQL {
     /**
@@ -58,7 +58,7 @@ class CommonSQL {
     /**
      * recuperation du store
      * @param {Number} storeId - id du commerce
-     * @returns {Object} store - le store
+     * @returns {Object} { store, offers } - renvoie les données du store et les offres rattachées au store 
      */
     async getStore(storeId){
         //recherche du store

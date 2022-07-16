@@ -236,11 +236,11 @@ module.exports = {
         //Vérification de la données avant la suppression de l'offre
         const offerHelper = new OfferHelper(userId, storeId, requestRoleId);
         const offer = await offerHelper.beforeDestroyOffer(offerId);
-        
+       
         //mise a jour de la donnée        
         const data = {...offer, ...{is_active: false}};
 
-        //supprssion de l'offre - pas is_active à false
+        //désactive l'offre
         await offerHelper.updateOffer(offer, data);        
 
         res.json({
@@ -262,7 +262,7 @@ module.exports = {
         const offerHelper = new OfferHelper(userId, storeId, requestRoleId);
 
         //récupération de offer et user       
-        const { offer, user } = await offerHelper.beforeGenerateToken(offerId);
+        const { offer, user } = await offerHelper.beforeGenerateRefundCode(offerId);
        
         //recherche de toutes offres validés par des clients
         const offers = await offerHelper.findOffers([{ id: offerId }]);
@@ -290,20 +290,21 @@ module.exports = {
 
         //Vérification de la données avant la récupération des token
         const offerHelper = new OfferHelper(userId, storeId, requestRoleId);
-        const offers = await offerHelper.beforeGetAllTokenByOfferId(offerId);
+        const offer = await offerHelper.beforeGetAllTokenByOfferId(offerId);
 
-        //Filtrage des données 
-        const tokenData = offers.map(user=>{
+        //Formate la sortie des données.
+        const refundCode = offer.client.map(user=>{
             const userData = {};
-            userData.userId = user.id;
-            userData.email = user.email;
-            userData.token = user.offerUser.token;
+            userData.refundCodeId = user.refund_code_id,
+            userData.refundCodeClientId = user.refund_code_client_id;
+            userData.refundCodeClientEmail = user.refund_code_client_email;
+            userData.refundCode = user.refund_code_code;
             return userData;
         });
 
         return res.json({           
-            tokenData,
-            offerId: offers.id
+            refundCode,
+            offerId: offer.id
 
         });
     },

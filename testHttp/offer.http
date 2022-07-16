@@ -37,7 +37,7 @@ Content-Type: application/json
 }
 
 ### modification d'un offre
-PATCH {{uri}}/api/offers/1
+PATCH {{uri}}/api/offers/2
 Cookie: {{cookie_csurf}}
 Cookie: {{cookie_auth_admin}}
 Content-Type: application/json
@@ -49,7 +49,7 @@ Content-Type: application/json
     "imageName": "test.jpg",
     "userId": "4",
     "storeId": "2",
-    "conditions": [2,1,6]
+    "conditions": [2,1,3]
 }
 
 ### récupération d'une offre
@@ -59,18 +59,18 @@ GET {{uri}}/api/offers/1
 GET {{uri}}/api/offers
 
 ### récupération des offres par ville
-GET {{uri}}/api/offers/by-city/10
+GET {{uri}}/api/offers/by-city/2
 
 ### récupération des offres par store
-GET {{uri}}/api/offers/by-store/5
+GET {{uri}}/api/offers/by-store/2
 
 ### récupération de toutes les offres par un professionel
-GET {{uri}}/api/offers/token/{{token}}/professional/4
+GET {{uri}}/api/offers/token/{{token}}/professional/5
 Cookie: {{cookie_csurf}}
 Cookie: {{cookie_auth_admin}}
 
 ### récupération offres d'un commerce par un professionnel Id
-GET {{uri}}/api/offers/token/{{token}}/professional/2/store/1
+GET {{uri}}/api/offers/token/{{token}}/professional/4/store/2
 Cookie: {{cookie_csurf}}
 Cookie: {{cookie_auth_pro}}
 
@@ -80,7 +80,7 @@ Cookie: {{cookie_csurf}}
 Cookie: {{cookie_auth_admin}}
 
 ###suppression d'une offre
-DELETE {{uri}}/api/offers/1
+DELETE {{uri}}/api/offers/2
 Cookie: {{cookie_csurf}}
 Cookie: {{cookie_auth_admin}}
 Content-Type: application/json
@@ -92,7 +92,7 @@ Content-Type: application/json
 }
 
 ### client souscri à une offre - génration d'un token
-GET  {{uri}}/api/offers/generate-token-by-offer/token/{{token}}/user/1/store/2/offer/3
+GET  {{uri}}/api/offers/generate-token-by-offer/token/{{token}}/user/1/store/2/offer/2
 Cookie: {{cookie_csurf}}
 Cookie: {{cookie_auth_pro}}
 

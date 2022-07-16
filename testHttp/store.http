@@ -37,7 +37,7 @@ Content-Type: application/json
 }
 
 ### modification d'un store
-PATCH {{uri}}/api/stores/3
+PATCH {{uri}}/api/stores/1
 Cookie: {{cookie_csurf}}
 Cookie: {{cookie_auth_admin}}
 Content-Type: application/json

@@ -1,4 +1,3 @@
-const belongTo = require('../helpers/belongTo');
 const StoreHelper = require('../helpers/controllerHelper/store');
 
 /**
@@ -31,7 +30,7 @@ module.exports = {
             street,
             phone,
             email,
-            user_id: userId,
+            account_id: userId,
             city_id: cityId,
             type_id: typeId
         });
@@ -69,7 +68,7 @@ module.exports = {
         const data = {...store, ...{name, presentation, image_url: imageName, street, phone, email, city_id: cityId, type_id: typeId}};
        
         //mise a jour du store
-        const updateStore = await storeHelper.updateStore(store, data);
+        const updateStore = await storeHelper.updateStore(store.id, data);
 
         res.json({
             updateStore,

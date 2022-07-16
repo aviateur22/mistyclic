@@ -1,4 +1,4 @@
-const OfferSQL = require('./querySQL/offerSQL');
+const Offer =  require('../../models/postgreSQL/offer');
 const commonFunction = require('./commonFunction');
 const randomGenerator = require('../security/generateToken');
 const userRole = require('../userRole');
@@ -6,7 +6,7 @@ const userRole = require('../userRole');
 /**
  * gestion du controller Offer
  */
-class OfferHelper extends OfferSQL {
+class OfferHelper extends Offer {
     /**
      * 
      * @param {Number} userId - id utilisateur
@@ -109,16 +109,13 @@ class OfferHelper extends OfferSQL {
         commonFunction.checkUserRole(user.role_id, userRole.professional);
 
         //on vérifie que le commerce existe
-        const store = await super.getStore(this.storeId);
+        const { store, offers } = await super.getStore(this.storeId);
 
-        //on vérifie que l'offre existe
-        const offer = await super.getOffer(offerId);
-
-        //on vérifie que l'offre est rattaché au commerce
-        await commonFunction.offerBelongToStore(store, offerId);        
+        //on vérifie que l'offre existe et qu'elle est rattachée  au commerce
+        const offer = await commonFunction.offerBelongToStore(offers, offerId);        
 
         //on verifie que l'offre est rattaché au professionelle
-        commonFunction.offerBelongToProfessional(offer, this.userId);                
+        commonFunction.offerBelongToProfessional(offer.account_id, this.userId);                
 
         return offer;
     }      
@@ -145,32 +142,29 @@ class OfferHelper extends OfferSQL {
         //vérification appartenance commerce et user
         if(this.storeId){            
             //on vérifie que le commerce existe
-            const store = await super.getStore(this.storeId);
+            const { store } = await super.getStore(this.storeId);            
 
             //on vérifie que le user est rattaché au commerce
-            commonFunction.storeBelongToProfessional(store, this.userId);    
+            commonFunction.storeBelongToProfessional(store.account_id, this.userId);    
         }
 
         return true;
     }
 
     /**
-     * vérification avant génération d'un token par un client
+     * vérification avant génération d'un code de remboursement par un client
      * @param {Number} offerId - id de l'offre
      * @returns { Object} offer | user - l'offre et le client concerné 
      */
-    async beforeGenerateToken(offerId){
+    async beforeGenerateRefundCode(offerId){
         //on vérifie le user
         const user = await super.getUser(this.userId);
 
-        //on vérifie que le commerce existe
-        const store = await super.getStore(this.storeId);
+        //on vérifie que le commerce existe et on récupère les offres associées a ce commerce
+        const { store, offers } = await super.getStore(this.storeId);     
 
-        //on vérifie que l'offre existe
-        const offer = await super.getOffer(offerId);
-
-        //on vérifie que l'offre est rattaché au commerce
-        await commonFunction.offerBelongToStore(store, offerId);
+        //on vérifie que l'offre existe rt qu'elle est rattaché au commerce
+        const offer = await commonFunction.offerBelongToStore(offers, offerId);
 
         //renvoie l'offre et l'utilisateur
         return ({
@@ -197,19 +191,19 @@ class OfferHelper extends OfferSQL {
         });
 
         //on vérifie que le commerce existe
-        const { store } = await super.getStore(this.storeId); 
+        const { store, offers } = await super.getStore(this.storeId); 
 
         //on que le commerce appartient au professionnel
         commonFunction.storeBelongToProfessional(store.account_id, this.userId);
      
-        //on vérifie que l'offre existe
-        const offer = await super.getOffer(offerId, super.getModels(1), store.id);
-
+        //on vérifie que l'offre existe et on récupére les clients ayant souscrit à l'offre
+        const offer = await super.getOffer(offerId, super.getModels(1));
+      
         //on vérifie que l'offre est rattaché au commerce
-        await commonFunction.offerBelongToStore(offer, offerId);
-        console.log(offer);
+        await commonFunction.offerBelongToStore(offers, offer.id);
+
         //on verifie que l'offre est rattaché au professionelle
-        commonFunction.offerBelongToProfessional(offer, this.userId);
+        commonFunction.offerBelongToProfessional(offer.account_id, this.userId);
 
         //suppression des subscriptions expired (au dela de XX minutes)
         await this.#removeSubscriptionOffer(offerId);      

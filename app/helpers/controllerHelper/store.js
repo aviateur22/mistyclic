@@ -1,11 +1,11 @@
-const StoreSQL =  require('./querySQL/storeSQL');
+const Store =  require('../../models/postgreSQL/store');
 const commonFunction = require('./commonFunction');
 const userRole = require ('../userRole');
 
 /**
  * gestion du controller Store
  */
-class StoreHelper extends StoreSQL {
+class StoreHelper extends Store  {
     constructor(userId, storeId, requestUserRole){
         super();
         this.userId = userId;
@@ -61,10 +61,10 @@ class StoreHelper extends StoreSQL {
         await super.getStoreType(typeId);
 
         //on vérifie que le commerce existe
-        const store = await super.getStore(this.storeId);
+        const { store } = await super.getStore(this.storeId);
 
         //on vérifie que le professionnel est rattaché au commerce
-        commonFunction.storeBelongToProfessional(store,user.id);
+        commonFunction.storeBelongToProfessional(store.account_id,user.id);
       
         //Vérification authorisation modification/création
         commonFunction.authorizationUpdateData({

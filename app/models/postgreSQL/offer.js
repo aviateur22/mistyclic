@@ -1,9 +1,8 @@
-//const {Offer, Store, User, Type, City, OfferUser, Refund, ConditionOffer, Condition } = require('../../../models');
 const CommonSQL = require('./commonSQL');
-const client = require('../../../database/pg');
+const client = require('../../database/pg');
 
 
-class StoreSQL extends CommonSQL{    
+class Offer extends CommonSQL{    
     /**
      * sélection du model pour effectuer des assciations
      * @param {Number} number - le numéro du model
@@ -29,29 +28,39 @@ class StoreSQL extends CommonSQL{
         let offer;  
 
         //Jointure avec un model
-        if(model){              
-            offer = await client.query(`
-            SELECT offer.id,
-            offer.account_id AS offer_pro_id,
-            offer.store_id AS offer_store_id,
-            offer_has_user.id AS offerUser_id,
-            offer_has_user.account_id AS offerUser_id,
-            offer_has_user.refund_code AS offerUser_refund_code,
-            account.email AS user_email
-            FROM offer
-            INNER JOIN offer_has_user ON offer.id = offer_has_user.offer_id
-            INNER JOIN account ON offer_has_user.account_id = account.id
-            WHERE offer.id = $1 AND offer.store_id = $2
-            `,
-            [offerId, storeId]
-            );
+        if(model){   
+            switch (model.model){
+            //récupération des codes de rembourssement + email des clients 
+            case 'offer_has_user': 
+                
+                //donnée de l'offre
+                offer = await client.query('SELECT * FROM "offer" WHERE id = $1',
+                    [offerId]);
+                
+                //offre pas trouvé
+                if(offer.rowCount === 0 ){
+                    throw ({ statusCode: 404, message: 'l\'offre recherchée n\'existe pas' });
+                }
+                
+                //données sur les clients ayant souscrit à l'offre
+                offer.rows[0].client = await client.query(`
+                SELECT
+                offer_has_user.id AS refund_code_id,
+                offer_has_user.account_id AS refund_code_client_id,
+                offer_has_user.refund_code AS refund_code_code,
+                offer_has_user.offer_id AS refund_code_offer_id,
+                account.email AS refund_code_client_email
+                FROM "offer_has_user"               
+                INNER JOIN "account" ON offer_has_user.account_id = account.id
+                WHERE offer_has_user.offer_id = $1
+                `,
+                [offerId]
+                ).then(client => client.rows);
 
-            //offre pas trouvé
-            if(offer.rowCount === 0 ){
-                throw ({ statusCode: 404, message: 'l\'offre recherchée n\'existe pas' });
-            }
-            
-            return offer.rows;
+               
+                return offer.rows[0];
+            default: throw ({ statusCode: 404, message: 'l\'offre recherchée n\'existe pas' });
+            }            
         } else {        
             offer = await client.query('SELECT * FROM "offer" WHERE offer.id = $1',                
                 [offerId]
@@ -194,11 +203,12 @@ class StoreSQL extends CommonSQL{
         store_id = $6,
         account_id = $7,
         city_id = $8,
-        updated_at = $9
-        WHERE id = $10
+        is_active = $9,
+        updated_at = $10
+        WHERE id = $11
         RETURNING *`
         , 
-        [data.name, data.presentation, data.global_refund, data.individual_refund, data.image_url, data.store_id, data.account_id, data.city_id, data.updated_at, offer.id]
+        [data.name, data.presentation, data.global_refund, data.individual_refund, data.image_url, data.store_id, data.account_id, data.city_id, data.is_active, data.updated_at, offer.id]
         );   
        
         //echec création
@@ -310,4 +320,4 @@ class StoreSQL extends CommonSQL{
     }
 }
 
-module.exports = StoreSQL;
+module.exports = Offer;
