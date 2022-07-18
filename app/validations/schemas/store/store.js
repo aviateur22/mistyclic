@@ -31,17 +31,8 @@ module.exports = Joi.object({
             'string.min': 'La présentation du magasin doit être compris entre 4 et 500 caractères',
         }),
 
-    /** path de l'image  */
-    imageName: Joi
-        .string()
-        .required()
-        .messages({
-            'string.empty': 'l\'ajout d\'une image est obligatoire',
-            'any.required': 'l\'ajout d\'une image est obligatoire',
-        }),
-
     /** rue */
-    street: Joi
+    adress: Joi
         .string()
         .pattern(/^[^ ][a-zA-Z0-9\d*\séè¨çàùê,;.'"_:?!</>()-]+[^ ]$/) 
         .required()
@@ -49,7 +40,16 @@ module.exports = Joi.object({
             'string.empty': 'le numéro et la rue sont obligatoire',
             'string.pattern.base': 'Le format du numéro et de la rue ne sont pas correcte',
             'any.required': 'le numéro et la rue sont obligatoire'
-        }),    
+        }),   
+        
+    zip: Joi
+        .string()
+        .required()
+        .messages({
+            
+            'any.required': 'le code postal est obligatoire',
+            'string.empty': 'le code postal est obligatoire'            
+        }),
 
    
     /** téléphone */
@@ -71,25 +71,22 @@ module.exports = Joi.object({
     email:Joi
         .string()
         .pattern(/^\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$/)
-        .required()
-        .messages({
-            'string.empty': 'l\'email est obligatoire',
-            'string.pattern.base': 'erreur dans le format de l\'email',
-            'any.required': 'l\'email est obligatoire'
+        .messages({          
+            'string.pattern.base': 'erreur dans le format de l\'email'           
         }),
 
     //id du commercant    
-    userId: Joi
-        .number()
-        .required()
-        .messages({
-            'number.base': 'l\'identifiant du commerçant n\'est pas correct',
-            'string.empty': 'l\'identifiant du commerçant est obligatoire',
-            'any.required': 'l\'identifiant du commerçant est obligatoire'
-        }),
+    // userId: Joi
+    //     .number()
+    //     .required()
+    //     .messages({
+    //         'number.base': 'l\'identifiant du commerçant n\'est pas correct',
+    //         'string.empty': 'l\'identifiant du commerçant est obligatoire',
+    //         'any.required': 'l\'identifiant du commerçant est obligatoire'
+    //     }),
     
     //id de la ville
-    cityId: Joi
+    city: Joi
         .number()
         .required()
         .messages({
@@ -99,7 +96,7 @@ module.exports = Joi.object({
         }),
     
     //id de la ville
-    typeId: Joi
+    type: Joi
         .number()
         .required()
         .messages({

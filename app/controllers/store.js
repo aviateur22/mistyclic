@@ -1,4 +1,3 @@
-const belongTo = require('../helpers/belongTo');
 const StoreHelper = require('../helpers/controllerHelper/store');
 
 /**
@@ -10,7 +9,7 @@ module.exports = {
      */
     createStore: async(req, res, next)=>{
         //roleId de la personne que effectue la requete
-        const requestRoleId = req.payload.data.roleId;
+        const requestRoleId = req.payload?.data?.roleId;
 
         //données de la requête obligatoire
         const { name, presentation, imageName, street, phone, email, userId, cityId, typeId } = req.body;
@@ -31,7 +30,7 @@ module.exports = {
             street,
             phone,
             email,
-            user_id: userId,
+            account_id: userId,
             city_id: cityId,
             type_id: typeId
         });
@@ -47,7 +46,7 @@ module.exports = {
      */
     updateStoreById: async(req, res, next)=>{
         //roleId de la personne que effectue la requete
-        const requestRoleId = req.payload.data.roleId;
+        const requestRoleId = req.payload?.data?.roleId;
 
         //id du commerce
         const storeId = req.params.storeId;
@@ -69,7 +68,7 @@ module.exports = {
         const data = {...store, ...{name, presentation, image_url: imageName, street, phone, email, city_id: cityId, type_id: typeId}};
        
         //mise a jour du store
-        const updateStore = await storeHelper.updateStore(store, data);
+        const updateStore = await storeHelper.updateStore(store.id, data);
 
         res.json({
             updateStore,

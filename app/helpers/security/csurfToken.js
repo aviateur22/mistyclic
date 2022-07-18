@@ -42,7 +42,7 @@ module.exports = {
      * @param {Text} tokenClient - jeton chiffré contenantles données a vérifier 
      * @returns 
      */
-    compare: async(jwt, tokenClient)=>{
+    compare: async(jwt, tokenClient)=>{   
         //clé secrete
         const KEY = process.env.JWT_PRIVATE_KEY;
 
@@ -70,7 +70,7 @@ module.exports = {
             if(!token){                
                 throw ({message: 'vous n`\'avez pas les droits pour executer l\'action demandée', statusCode:'403'});
             }
-
+            
             /** decryptage des token */
             const aes = new AES();
 
@@ -82,22 +82,22 @@ module.exports = {
 
             /**séparation du JWTtokenDecrypt avec le signe | */
             const jwtTokenArray = jwtTokenDecrypt.split('|');
-
+            
             if(jwtTokenArray.length !== 2){ 
                 throw ({message: 'vous n`\'avez pas les droits pour executer l\'action demandée', statusCode:'403'});                   
             }
-    
+            
             // /** Récupération codeSecret + token depuis le JWT  */
             const secretWordDecrypt = aes.decrypt(jwtTokenArray[0]);
             const tokenDecrypt = jwtTokenArray[1];
-
+            
             /** récupération mot secret de l'appication */
-            const secretWord = process.env.SECRET_APP_WORD;
-
+            const secretWord = process.env.SECRET_APP_WORD;            
             //comparaison du secret word et du token aéatoire
-            if(secretWordDecrypt !== secretWord || tokenDecrypt !== tokenClientDecrypt){
+            if((secretWordDecrypt !== secretWord) || (tokenDecrypt !== tokenClientDecrypt)){                
                 throw ({message: 'vous n`\'avez pas les droits pour executer l\'action demandée', statusCode:'403'});
             }
+            
             return true;  
         });
     }

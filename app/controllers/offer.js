@@ -39,7 +39,7 @@ module.exports = {
             userId,
             cityId
         });    
-
+      
         //ajout des nouvelles conditions
         await offerHelper.addCondition(offer, conditions);
 
@@ -68,10 +68,9 @@ module.exports = {
 
         //données à modifier
         const data = { ...offer, ...{name, presentation, image_url: imageName }};
-
-
+        
         //mise a jour des données
-        const updateOffer = await offerHelper.updateOffer(offer, data);  
+        const updateOffer = await offerHelper.updateOffer(offer, data);        
         
         //Suppression des anciennes conditions de l'offre
         await offerHelper.deleteCondition(updateOffer.id);
@@ -126,11 +125,11 @@ module.exports = {
 
         //recherche des offres de la ville
         const offerHelper = new OfferHelper();
-        const param = [
-            {city_id: cityId}   
+        const filters = [
+            {city_id: cityId}
         ];   
 
-        const offers = await offerHelper.findOffers(param);
+        const offers = await offerHelper.findOffers(filters);
 
         res.json({
             offers
@@ -141,18 +140,18 @@ module.exports = {
      * récupération des offres d'un commerce
      * @param {boolean} inactiveOffer - affichage des offres qui sont aussi inactive (pour un professionnel)
      */
-    getOffersByStore:(inactiveOffer)=>async(req, res, next)=>{  
+    getOffersByStore:(inactiveOffer)=>async(req, res, next)=>{
         //roleId de la personne que effectue la requete
-        const requestRoleId = req.payload.data.roleId;
-
+        const requestRoleId = req.payload?.data?.roleId;
+        
         //id du commerce
         const storeId = req.params.storeId;
 
-        //paramètre de la requête      
-        let param;
+        //filtre pour la requête      
+        let filters;
 
         let offerHelper;
-
+        
         //Seule les professionnels peuvent avoir accès aux offres inactives
         if(inactiveOffer){
             //id du professionel
@@ -161,23 +160,22 @@ module.exports = {
             //vérification des droits d'accès
             offerHelper = new OfferHelper(userId, storeId, requestRoleId);     
             await offerHelper.beforeProfessionalGetOffers(userRole.professional);
-
             //paramatres du filtre
-            param = [
+            filters = [
                 {store_id: storeId}   
             ];            
-        } else {
+        } else {            
             offerHelper = new OfferHelper(null, storeId, requestRoleId);  
             
             //paramatres du filtre
-            param = [            
+            filters = [            
                 {is_active: true},    
                 {store_id: storeId}   
             ];
         }   
 
         //récupération des offres liées aux commerces
-        const offers = await offerHelper.findOffers(param);
+        const offers = await offerHelper.findOffers(filters);
 
         res.json({
             offers
@@ -205,11 +203,11 @@ module.exports = {
         if(allOffer){
             await offerHelper.beforeProfessionalGetOffers(userRole.professional);
             paramRequest = [
-                {user_id: userId},    
+                {account_id: userId},    
             ];            
         } else {            
             paramRequest = [
-                {user_id: userId},
+                {account_id: userId},
                 {is_active: true}
             ];
         }   
@@ -238,11 +236,11 @@ module.exports = {
         //Vérification de la données avant la suppression de l'offre
         const offerHelper = new OfferHelper(userId, storeId, requestRoleId);
         const offer = await offerHelper.beforeDestroyOffer(offerId);
-        
+       
         //mise a jour de la donnée        
         const data = {...offer, ...{is_active: false}};
 
-        //supprssion de l'offre - pas is_active à false
+        //désactive l'offre
         await offerHelper.updateOffer(offer, data);        
 
         res.json({
@@ -264,7 +262,7 @@ module.exports = {
         const offerHelper = new OfferHelper(userId, storeId, requestRoleId);
 
         //récupération de offer et user       
-        const { offer, user } = await offerHelper.beforeGenerateToken(offerId);
+        const { offer, user } = await offerHelper.beforeGenerateRefundCode(offerId);
        
         //recherche de toutes offres validés par des clients
         const offers = await offerHelper.findOffers([{ id: offerId }]);
@@ -281,7 +279,7 @@ module.exports = {
     },
 
     /**
-     * Récupération de tous les tokens actifs
+     * Récupération de tous les codes de remboursement actifs
      */
     getAllTokenByOfferId: async(req, res, next)=>{
         //roleId de la personne que effectue la requete
@@ -292,20 +290,21 @@ module.exports = {
 
         //Vérification de la données avant la récupération des token
         const offerHelper = new OfferHelper(userId, storeId, requestRoleId);
-        const offers = await offerHelper.beforeGetAllTokenByOfferId(offerId);
+        const offer = await offerHelper.beforeGetAllTokenByOfferId(offerId);
 
-        //Filtrage des données 
-        const tokenData = offers?.users.map(user=>{
+        //Formate la sortie des données.
+        const refundCode = offer.client.map(user=>{
             const userData = {};
-            userData.userId = user.id;
-            userData.email = user.email;
-            userData.token = user.offerUser.token;
+            userData.refundCodeId = user.refund_code_id,
+            userData.refundCodeClientId = user.refund_code_client_id;
+            userData.refundCodeClientEmail = user.refund_code_client_email;
+            userData.refundCode = user.refund_code_code;
             return userData;
         });
 
         return res.json({           
-            tokenData,
-            offerId: offers.id
+            refundCode,
+            offerId: offer.id
 
         });
     },

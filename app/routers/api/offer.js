@@ -113,7 +113,7 @@ router.get('/by-city/:cityId',
 //récupération des offres par store
 router.get('/by-store/:storeId', 
     validation(offerSchema.storeIdSchema, 'params'),
-    controllerHandler(offerController.getOffersByStore));
+    controllerHandler(offerController.getOffersByStore(false)));
 
 // génération token 5 lettres par un client
 router.get('/generate-token-by-offer/token/:token/user/:userId/store/:storeId/offer/:offerId',

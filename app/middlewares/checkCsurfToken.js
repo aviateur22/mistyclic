@@ -4,22 +4,19 @@ const csurfToken = require('../helpers/security/csurfToken');
 module.exports = async(req, res, next)=>{
     /**Recupération des cookies */ 
     if(!req.cookie){
-        throw ({message: 'vous n`\'avez pas les droits pour executer l\'action demandée', statusCode:'403'});
-    }      
-    
-  
+        throw ({message: 'vous n\'avez pas le droit d\'executer cette action', statusCode:'403'});
+    }
     
     /** récupération du cookie de token */
     if(!req.cookie.token_data){
-        throw ({message: 'vous n`\'avez pas les droits pour executer l\'action demandée', statusCode:'403'});
-    }   
-
+        throw ({message: 'vous n\'avez pas le droit d\'executer cette action', statusCode:'403'});
+    }  
     /** token depuis la requete soit dans le body doit dans les params*/    
     const bodyToken = req.body.token ? req.body.token : req.params.token;  
 
     /** token de la requete absent */
     if(!bodyToken){
-        throw ({message: 'vous n`\'avez pas les droits pour executer l\'action demandée', statusCode:'403'});
+        throw ({message: 'vous n\'avez pas le droit d\'executer cette action', statusCode:'403'});
     }
 
     /** récupération cookie de token */
@@ -27,9 +24,9 @@ module.exports = async(req, res, next)=>{
     
     /**comparaiosn du token dans le JWT et le token du client*/        
     const compare =  await csurfToken.compare(cookieToken, bodyToken);
-
+   
     if(!compare){
-        throw ({message: 'vous n`\'avez pas les droits pour executer l\'action demandée', statusCode:'403'});
+        throw ({message: 'vous n\'avez pas le droit d\'executer cette action', statusCode:'403'});
     }
     return next();
 };

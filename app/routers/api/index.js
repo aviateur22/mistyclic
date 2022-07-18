@@ -30,7 +30,7 @@ router.use('/types', typeRouter);
 router.use('/offers', offerRouter);
 
 //Token
-router.use('/token', tokenRouter);
+router.use('/tokens', tokenRouter);
 
 //professionel
 router.use('/professionals', 
