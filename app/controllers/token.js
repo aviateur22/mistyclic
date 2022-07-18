@@ -30,10 +30,10 @@ module.exports = {
         const option =  cookieOption.cookieOption;
         
         /**génération d'un cookie */
-        res.cookie('token_data', jwt, {secure: option.secure, sameSite:option.sameSite, httpOnly: option.httpOnly });
-        
+        res.cookie('token_data', jwt, { secure: option.secure, sameSite:option.sameSite, httpOnly: option.httpOnly });
+       
         res.status(200).json({
-            token: token
+            token
         });
     }
 };

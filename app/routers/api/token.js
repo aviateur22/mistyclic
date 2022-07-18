@@ -10,7 +10,9 @@ const tokenController = require('../../controllers/token');
 //wrapper de controller
 const controllerHandler = require('../../helpers/controllerHandler');
 
-//création d'une offre
+//token pour faire les test unitaires
 router.get('/test', controllerHandler(tokenController.getToken(jwtExpireIn.testTime)));
 
+//token
+router.get('/', controllerHandler(tokenController.getToken(jwtExpireIn.professionalLoginTime)));
 module.exports = router;

@@ -9,7 +9,7 @@ module.exports = {
      */
     createStore: async(req, res, next)=>{
         //roleId de la personne que effectue la requete
-        const requestRoleId = req.payload.data.roleId;
+        const requestRoleId = req.payload?.data?.roleId;
 
         //données de la requête obligatoire
         const { name, presentation, imageName, street, phone, email, userId, cityId, typeId } = req.body;
@@ -46,7 +46,7 @@ module.exports = {
      */
     updateStoreById: async(req, res, next)=>{
         //roleId de la personne que effectue la requete
-        const requestRoleId = req.payload.data.roleId;
+        const requestRoleId = req.payload?.data?.roleId;
 
         //id du commerce
         const storeId = req.params.storeId;
