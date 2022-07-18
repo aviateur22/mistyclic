@@ -9,6 +9,7 @@ const storeRouter = require('./store');
 const typeRouter = require('./type');
 const anonymousRouter = require('./anonymous');
 const tokenRouter = require ('./token');
+const cityRouter = require('./city');
 
 /**middleware */
 const controllerHandler = require('../../helpers/controllerHandler');
@@ -31,6 +32,9 @@ router.use('/offers', offerRouter);
 
 //Token
 router.use('/tokens', tokenRouter);
+
+//city
+router.use('/cities', cityRouter);
 
 //professionel
 router.use('/professionals', 
